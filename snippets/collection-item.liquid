@@ -1,0 +1,58 @@
+{% liquid
+    case section.settings.collection_img_orientation
+        when 'square'
+            assign img_width  = 900
+            assign img_height = 900
+        when 'landscape'
+            assign img_width  = 900
+            assign img_height = 720
+        when 'portrait'
+            assign img_width  = 720
+            assign img_height = 900
+    endcase
+
+    assign image = collection.image | default: collection.products.first.featured_image
+    assign title = collection.title 
+
+    unless block.settings.img == blank
+        assign image = block.settings.img
+    endunless
+
+    unless block.settings.title == blank
+        assign title = block.settings.title
+    endunless
+
+    assign classes = '' 
+    assign classes = classes | append: section.settings.collection_border | append: ' '
+    assign classes = classes | append: section.settings.collection_border_color | append: ' ' 
+    assign classes = classes | append: 'border-' | append: section.settings.collection_border_width | append: ' '  
+    assign classes = classes | strip
+%}
+
+<li class="collection-item {{ section.settings.product_card_spacing_mobile | prepend: 'p-' }} {{ section.settings.product_card_spacing_desktop | prepend: 'p-lg-' }}" {{ block.shopify_attributes }}>
+    <div 
+        class="{% unless section.settings.animation == '' %}animate__animated opacity-0 {{ section.settings.animation_speed }}{% endunless %} rounded {{ section.settings.collection_shadow_sp }}"
+        data-animate-class="{{ section.settings.animation }}"
+        style="animation-delay: {{ index | times: 150 }}ms;">
+        <a 
+            class="overflow-hidden" 
+            href="{{ collection.url }}">
+            {% if image == blank %}
+                {{ 'collection-apparel-' | append: index | placeholder_svg_tag: 'placeholder-svg rounded' }}
+            {% else %}
+                <img 
+                    class="collection-item-img img-fluid rounded {{ classes }}"
+                    src="{{ image | image_url: width: img_width, height: img_height, crop: 'center' }}" 
+                    alt="{{ image.alt | escape }}"
+                    width="{{ img_width }}"
+                    height="{{ img_height }}"
+                    loading="lazy">
+            {% endif %}
+            {% if section.settings.collection_show_title %}
+                <{{ block.settings.heading_tag }} class="collection-item-title mb-0 {{ block.settings.title_size | default: 'h5' }}">
+                    {{ title | default: 'Titre Collection' }}
+                </{{ block.settings.heading_tag }}>
+            {% endif %}
+        </a>
+    </div>
+</li>

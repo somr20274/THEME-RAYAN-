@@ -1,0 +1,27 @@
+{% liquid
+    assign mt = block.settings.mt | prepend: 'mt-'
+    assign mb = block.settings.mb | prepend: 'mb-'
+%}
+
+<div
+  id="product-estimated-delivery"
+  class="{{ mt }} {{ mb }}"
+  data-start-days="{{ block.settings.delivery_start_days }}"
+  data-end-days="{{ block.settings.delivery_end_days }}"
+  data-lang="{{ block.settings.language }}"
+  data-color="{{ block.settings.color_estimation }}"
+  data-message="{{ block.settings.delivery_message }}"
+  data-exclude-sundays="{{ block.settings.exclude_sundays }}"
+  {{ block.shopify_attributes }}
+>
+  <div class="d-flex align-items-center">
+    {% unless block.settings.icon == blank %}
+      <div class="block-icon flex-shrink-0 me-4">
+        {{ block.settings.icon }}
+      </div>
+    {% endunless %}
+    <div class="delivery-message rte small fst-italic">
+      Chargement de la livraison estimée…
+    </div>
+  </div>
+</div>

@@ -1,0 +1,88 @@
+{% comment %}
+---------------------------------------------------------
+Copyright © 2019/2024 Theme Shopiweb Premium. Tous droits réservés.
+La copie, la modification, la distribution ou l'utilisation
+non autorisée de ce code ou de toute partie de celui-ci est formellement interdite.
+Les contrevenants seront poursuivis dans toute la mesure permise par la loi.
+---------------------------------------------------------
+{% endcomment %}
+{% liquid 
+
+    assign btn_shadow_sp = settings.btn_shadow_sp
+
+    assign classes = '' 
+    if block.settings.enable_border == false
+        assign classes = classes | append: 'border-0 '
+    else
+        assign classes = classes | append: block.settings.border_color | append: ' ' 
+        assign classes = classes | append: 'border-' | append: block.settings.border_width | append: ' '
+    endif
+    assign classes = classes | append: block.settings.shadow_sp | append: ' ' 
+    assign classes = classes | strip
+%}
+
+{% style %}
+  {%- for block in section.blocks -%}
+      /* Image SVG */
+      .custom_icon-{{ block.id }} svg {
+        height: {{ block.settings.image_width_custom }}px;
+        width: {{ block.settings.image_width_custom }}px;
+      } 
+  
+      /* Image SVG mobile */
+      @media screen and (max-width: 990px) {
+        .custom_icon-{{ block.id }} svg {
+          height: {{ block.settings.image_width_custom }}px;
+          width: {{ block.settings.image_width_custom }}px;
+        }
+      } 
+  {%- endfor -%}
+{% endstyle %}
+
+<div 
+    class="{% unless section.settings.animation == '' %}animate__animated opacity-0 {{ section.settings.animation_speed }}{% endunless %}"
+    data-animate-class="{{ section.settings.animation }}"
+    style="animation-delay: {{ index | times: 150 }}ms;">
+    <div 
+        class="card {{ classes }} custom_icon-{{ block.id }}">
+        <div class="card-body {{ block.settings.text_align_mobile }} {{ block.settings.text_align_desktop }}">
+            <div class="{% if block.settings.icon_position == 'left' and block.settings.icon != blank or block.settings.img != blank %}
+                          d-flex align-items-center
+                        {% endif %}"
+            >
+                {% if block.settings.img != nil and block.settings.icon == blank %}
+                    {% assign img_width_x2 = block.settings.img_width | times: 2 %}
+                    <img
+                        class="img-fluid mb-4 {% if block.settings.icon_position == 'left' %}me-5{% endif %}"
+                        src="{{ block.settings.img.src | image_url: width: img_width_x2 }}"
+                        alt="{{ block.settings.img.alt | escape }}"
+                        width="{{ block.settings.img_width }}"
+                        height="{{ block.settings.img_width | divided_by: block.settings.img.aspect_ratio }}"
+                        loading="lazy">
+                {% endif %}
+                {% unless block.settings.icon == blank %}
+                    <div class="{% if block.settings.icon_position == 'left' %}block-icon flex-shrink-0 me-5{% else %}mb-5{% endif %}">
+                        {{ block.settings.icon }}
+                    </div>
+                {% endunless %}
+                <div class="block-inner">
+                    {% unless block.settings.title == blank %}
+                        <h3 class="title mb-4 {{ block.settings.title_size }}">
+                            {{ block.settings.title }}
+                        </h3>
+                    {% endunless %}
+                    {% unless block.settings.description == blank %}
+                        <div class="description rte mt-n2 mb-0 {{ block.settings.description_size }}">
+                            {{ block.settings.description }}
+                        </div>
+                    {% endunless %}
+                    {% unless block.settings.btn_text == blank %}
+                        <a class="btn mt-5  {{ block.settings.btn_color }} {{ btn_shadow_sp }} {{ block.settings.btn_size }}" href="{{ block.settings.btn_url }}">
+                            {{ block.settings.btn_text }}
+                        </a>
+                    {% endunless %}
+                </div>
+            </div>
+        </div> 
+    </div>
+</div>

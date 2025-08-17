@@ -1,0 +1,46 @@
+{% liquid 
+    assign mt = block.settings.mt | prepend: 'mt-'
+    assign mb = block.settings.mb | prepend: 'mb-'
+%}
+
+<div class="product-badges d-flex flex-wrap align-items-center gap-3 {{ block.settings.badge_align }} {{ mt }} {{ mb }}" {{ block.shopify_attributes }}>
+  {% comment %} BADGE 1 {% endcomment %}
+  {% if block.settings.badge1_text != blank %}
+    <span class="badge {{ block.settings.badge1_color }} {{ block.settings.badge1_font_size }} {{ block.settings.badge1_text_transform }} fw-{{ block.settings.badge1_font_weight }} d-inline-flex align-items-center gap-2">
+      {% if block.settings.badge1_svg != blank %}
+        {{ block.settings.badge1_svg | replace: "<svg", "<svg height='1.3em' class='me-2'" }}
+      {% endif %}
+      {{ block.settings.badge1_text }}
+    </span>
+  {% endif %}
+
+  {% comment %} BADGE 2 {% endcomment %}
+  {% if block.settings.badge2_text != blank %}
+    <span class="badge {{ block.settings.badge2_color }} {{ block.settings.badge2_font_size }} {{ block.settings.badge2_text_transform }} fw-{{ block.settings.badge2_font_weight }} d-inline-flex align-items-center gap-2">
+      {% if block.settings.badge2_svg != blank %}
+        {{ block.settings.badge2_svg | replace: "<svg", "<svg height='1.3em' class='me-2'" }}
+      {% endif %}
+      {{ block.settings.badge2_text }}
+    </span>
+  {% endif %}
+
+  {% comment %} BADGE 3 {% endcomment %}
+  {% if block.settings.badge3_text != blank %}
+    <span class="badge {{ block.settings.badge3_color }} {{ block.settings.badge3_font_size }} {{ block.settings.badge3_text_transform }} fw-{{ block.settings.badge3_font_weight }} d-inline-flex align-items-center gap-2">
+      {% if block.settings.badge3_svg != blank %}
+        {{ block.settings.badge3_svg | replace: "<svg", "<svg height='1.3em' class='me-2'" }}
+      {% endif %}
+      {{ block.settings.badge3_text }}
+    </span>
+  {% endif %}
+
+  {% comment %} BADGE 4 {% endcomment %}
+  {% if block.settings.badge4_text != blank %}
+    <span class="badge {{ block.settings.badge4_color }} {{ block.settings.badge4_font_size }} {{ block.settings.badge4_text_transform }} fw-{{ block.settings.badge4_font_weight }} d-inline-flex align-items-center gap-2">
+      {% if block.settings.badge4_svg != blank %}
+        {{ block.settings.badge4_svg | replace: "<svg", "<svg height='1.3em' class='me-2'" }}
+      {% endif %}
+      {{ block.settings.badge4_text }}
+    </span>
+  {% endif %}
+</div>

@@ -1,0 +1,77 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
+{
+  "sections": {
+    "richtext_zardcN": {
+      "type": "richtext",
+      "settings": {
+        "bg_type": "predefined",
+        "bg_color": "bg-body text-body",
+        "bg_gradient_color": "linear-gradient(180deg, rgba(108, 117, 125, 1), rgba(52, 58, 64, 1) 100%)",
+        "background_img_opacity": 0.3,
+        "background_img_blur": 0,
+        "max_width": "960",
+        "text_align_mobile": "text-center",
+        "text_align_desktop": "text-lg-center",
+        "number_impact": "",
+        "title_impact": "",
+        "impact_text_font_family": "",
+        "impact_text_size_ratio": 1,
+        "text_style": "",
+        "text_color": "#000000",
+        "stroke_color": "",
+        "text_gradient": "",
+        "brand_image_size": "60",
+        "subtitle": "NOINDEX NOFOLLOW",
+        "subtitle_size": "fs-5",
+        "color_caption": "#6c757d",
+        "title_overlay": "",
+        "title_overlay_position": "center",
+        "title_overlay_size": "3",
+        "color_title_overlay": "#000000",
+        "title_overlay_opacity": 0.1,
+        "apply_text_stroke": false,
+        "title": "Page Non Indexée - Noindex, Nofollow",
+        "italic_color_option": "none",
+        "highlighted_text_style": "none",
+        "highlight_color": "#25d366",
+        "title_gradient_color": "linear-gradient(90deg, rgba(201, 151, 0, 1), rgba(29, 29, 31, 1) 100%)",
+        "heading_tag": "h2",
+        "title_size": "h2",
+        "show_svg_h2": true,
+        "description": "<p>Vous êtes sur une page qui ne sera pas indexée par les moteurs de recherche et dont les liens ne seront pas suivis. Le contenu de cette page est protégé par les balises noindex et nofollow. Si vous souhaitez que cette page reste privée et non répertoriée dans les moteurs de recherche, vous êtes au bon endroit.</p>",
+        "description_size": "fs-5",
+        "readmore": false,
+        "formread": 200,
+        "readmore_color": "#ffffff",
+        "text_voirplus": "Voir plus",
+        "text_voirmoins": "Voir moins",
+        "btn_text": "",
+        "btn_url": "",
+        "btn_color": "btn-primary",
+        "btn_size": "btn-md",
+        "btn_secondary_text": "",
+        "btn_secondary_url": "",
+        "btn_secondary_color": "btn-primary",
+        "btn_secondary_size": "btn-md",
+        "pt": 13,
+        "pb": 13,
+        "mt": 0,
+        "mb": 0,
+        "visibility_xs": true,
+        "visibility_md": true,
+        "visibility_lg": true
+      }
+    }
+  },
+  "order": [
+    "richtext_zardcN"
+  ]
+}

@@ -1,0 +1,23 @@
+{% liquid 
+    assign mt = block.settings.mt | prepend: 'mt-'
+    assign mb = block.settings.mb | prepend: 'mb-'
+%}
+
+<div class="product-block-score-progress {{ mt }} {{ mb }}" {{ block.shopify_attributes }}>
+  <div class="progress-circle-wrapper">
+    <div 
+      class="product-progress-circle" 
+      style="--progress-border-color: {{ block.settings.progress_border_color }}; --circle-size: {{ block.settings.progress_circle_size }}px; --border-thickness: {{ block.settings.progress_border_thickness }}px; --percentage: 0%;" 
+      data-percentage="{{ block.settings.percentage }}"
+      aria-label="{{ block.settings.progress_text }}"
+      role="progressbar"
+      aria-valuenow="0"
+      aria-valuemin="0"
+      aria-valuemax="100">
+      <div class="progress-value">0%</div>
+    </div>
+    <div class="progress-circle-text small">
+      {{ block.settings.progress_text }}
+    </div>
+  </div>
+</div>

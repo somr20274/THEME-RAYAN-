@@ -1,0 +1,287 @@
+{% liquid
+  case block.settings.img_orientation
+    when 'square'
+      assign img_width  = 75
+      assign img_height = 75
+    when 'landscape'
+      assign img_width  = 75
+      assign img_height = 45
+    when 'portrait'
+      assign img_width  = 45
+      assign img_height = 75
+  endcase
+
+  assign current_variant = product.selected_or_first_available_variant
+  assign metafield_namespace = block.settings.metafield | split: '.' | first
+  assign metafield_key = block.settings.metafield | split: '.' | last
+  assign metafield_value = product.metafields[metafield_namespace][metafield_key].value
+
+  assign mt = block.settings.mt | prepend: 'mt-'
+  assign mb = block.settings.mb | prepend: 'mb-'
+
+  assign bundle_default_index = -1
+  unless block.settings.bundle_ouvert_par_defaut == 'none'
+    assign bundle_default_index = block.settings.bundle_ouvert_par_defaut | minus: 1
+  endunless
+
+  assign gift_pack_index = block.settings.gift_pack_index | default: 0 | plus: 0
+  assign gift_product = all_products[block.settings.gift_product]
+  assign gift_variant = gift_product.variants.first
+%}
+
+{% style %}
+  .shopibundle-box:hover {
+    border-color: {{ block.settings.border_color_active | default: '#C99700' }};
+  }
+  
+  .shopibundle-box.active {
+    background: {{ block.settings.bg_color_all_packs }};
+  }
+  
+  .bundle-variant-select {
+    border-color: {{ block.settings.border_color_active | default: '#C99700' }};
+  }
+
+  #bundleAccordion .accordion-item.active:not(:first-of-type),
+  #bundleAccordion .accordion-item:hover:not(:first-of-type) {
+    border-top: 2px solid {{ block.settings.border_color_active | default: '#C99700' }};
+  }
+
+  .shopibundle-gift {
+    background: {{ block.settings.bg_color_gift }};
+  }
+
+  .shopibundle-plus-icon {
+    position: absolute;
+    left: 50%;
+    top: 0;
+    transform: translate(-50%, -50%);
+    z-index: 2;
+    cursor: default;
+  }
+
+  .shopibundle-box.active .accordion-toggle {
+    border-bottom-right-radius: 0px !important;
+    border-bottom-left-radius: 0px !important;
+  }
+{% endstyle %}
+
+{% if metafield_value %}
+  <div id="product-qty-bundle" 
+       class="{{ mt }} {{ mb }}"
+       style="--border-color-active: {{ block.settings.border_color_active | default: '#C99700' }};"
+       {{ block.shopify_attributes }}>
+    <div class="mb-5 title {{ block.settings.text_align }}">
+      <{{ block.settings.heading_tag }} class="{{ block.settings.title_size }}">{{ block.settings.title }}</{{ block.settings.heading_tag }}>
+    </div>
+    
+
+    <div class="accordion" id="bundleAccordion">
+      {% for item in metafield_value %}
+        {% assign values = item | split: ':' %}
+        {% assign qty = values[0] | plus: 0 %}
+        {% assign discount = values[1] | plus: 0 %}
+      
+        {% assign save = discount | append: '%' %}
+        {% assign unit_price = current_variant.price %}
+        {% assign total_price = unit_price | times: qty %}
+        {% assign total_discount = total_price | times: discount | divided_by: 100 %}
+        {% assign final_price = total_price | minus: total_discount %}
+        {% assign unit_final_price = final_price | divided_by: qty %}
+      
+        {% assign badge = '' %}
+        {% if discount > 10 %}
+          {% assign badge = 'best' %}
+        {% elsif discount > 5 %}
+          {% assign badge = 'popular' %}
+        {% endif %}
+      
+        {% assign show_gift = false %}
+        {% if gift_pack_index > 0 %}
+          {% if forloop.index == gift_pack_index %}
+            {% if gift_product != blank %}
+              {% assign show_gift = true %}
+            {% endif %}
+          {% endif %}
+        {% endif %} 
+
+        <div class="accordion-item shopibundle-box rounded mb-4 {% if forloop.index0 == bundle_default_index %}active{% endif %}"
+             data-gift-variant-id="{% if show_gift %}{{ gift_variant.id }}{% endif %}"
+             data-final-price="{{ final_price | money }}">
+          <div class="accordion-header shopibundle-header" onclick="toggleBundle(this)">
+            <div class="accordion-toggle px-5 py-5 rounded">
+              <div class="text-opacity d-flex justify-content-between align-items-center">
+                <div class="fw-bold">{{ product.title }} (X{{ qty }})</div>
+                <div style="color: {{ block.settings.price_color | default: '#22c55e' }}">
+                  {{ unit_final_price | money }}{{ 'product.qty_breaks_variants.label_unit' | t }}
+                </div>
+              </div>
+
+              {% if total_discount > 0 %}
+                <div class="d-flex justify-content-between align-items-center pt-2">
+                  <span class="text-opacity text-muted small">
+                    {{ 'product.qty_breaks_variants.label_save' | t }} {{ total_discount | money }} ({{ save }})
+                  </span>
+                  {% if badge == 'popular' and block.settings.badge_text_popular != blank %}
+                    <span class="bundle-badge badge badge-popular"
+                          style="background-color: {{ block.settings.badge_color_popular | default: '#f59f00' }};{% if block.settings.badge_popular_blink %}animation: flash 3s infinite;{% endif %}">
+                      {{ block.settings.badge_text_popular }}
+                    </span>
+                  {% endif %}
+                  {% if badge == 'best' and block.settings.badge_text_best != blank %}
+                    <span class="bundle-badge badge badge-best"
+                          style="background-color: {{ block.settings.badge_color_best | default: '#22c55e' }};{% if block.settings.badge_best_blink %}animation: flash 3s infinite;{% endif %}">
+                      {{ block.settings.badge_text_best }}
+                    </span>
+                  {% endif %}
+                </div>
+              {% endif %}
+        
+            </div>
+          </div>
+
+          <div class="accordion-collapse collapse {{ block.settings.bg_color_all_packs }} {% if forloop.index0 == bundle_default_index %}show{% endif %}">
+            <div class="accordion-body animate__animated animate__fadeIn animate__faster">
+              <div class="d-flex flex-column flex-md-row align-items-start gap-4">
+                <div class="flex-grow-1 w-100">
+                  {% for i in (1..qty) %}
+                    <div class="d-flex align-items-center gap-6 mb-4">
+                      {% assign first_variant = product.variants | where: "available", true | first %}
+                      <img class="variant-thumbnail img-fluid rounded {{ block.settings.border }} {{ block.settings.shadow_sp }}"
+                           src="{{ first_variant.featured_image | image_url: width: 150, height: 150, crop: 'center' }}"
+                           width="{{ img_width }}" 
+                           height="{{ img_height }}"
+                           alt="Variante {{ i }}">
+
+                      <div class="w-100">
+                        <label class="form-label small fw-semibold">{{ 'product.qty_breaks_variants.label_option' | t }} {{ i }} : {{ block.settings.label_option_singular }}</label>
+                        {% assign selected_variant = product.variants | where: "available", true | first %}
+                        <select class="form-select small bundle-variant-select">
+                          {% for option1 in product.options_by_name[product.options[0]].values %}
+                            {% for option2 in product.options_by_name[product.options[1]].values %}
+                              {% assign variant_title = option1 | append: ' / ' | append: option2 %}
+                              {% assign variant = product.variants | where: "title", variant_title | first %}
+                              {% if variant %}
+                                <option 
+                                  value="{{ variant.id }}" 
+                                  data-price="{{ variant.price }}"
+                                  data-image="{{ variant.featured_image | image_url: width: 150, height: 150, crop: 'center' }}"
+                                  {% unless variant.available %}disabled{% endunless %}
+                                  {% if variant.id == selected_variant.id %}selected{% endif %}>
+                                  {{ variant.title }}
+                                  {% if block.settings.variant_show_price %}
+                                    - {{ variant.price | money }}
+                                  {% endif %}
+                                  {% unless variant.available %} - {{ 'product.sold_out' | t }}{% endunless %}
+                                </option>
+                              {% endif %}
+                            {% endfor %}
+                          {% endfor %}
+                        </select>
+                      </div>
+                    </div>
+                  {% endfor %}
+                        
+                  <div class="accordion-footer px-5 py-3 rounded bg-white d-flex justify-content-between align-items-center mt-6
+                      {% if show_gift %}mb-4{% endif %}">
+                    <div class="fw-bold">{{ 'product.qty_breaks_variants.total_price' | t }}</div>
+                    <div class="fw-bold fs-5 bundle-price-display" style="color: {{ block.settings.price_color | default: '#22c55e' }}">
+                      <span>{{ final_price | money }}</span>
+                      {% if total_discount > 0 %}
+                        <span class="text-muted text-decoration-line-through ms-2">
+                          {{ total_price | money }}
+                        </span>
+                      {% endif %}
+                    </div>
+                  </div>
+
+                </div>
+              </div>
+            </div>
+          </div>
+          {% if show_gift %}
+            <div class="shopibundle-gift position-relative d-flex align-items-center justify-content-between gap-4 py-5 px-6 rounded-bottom {{ block.settings.bg_color_gift }} {{ block.settings.gift_text_color }}"
+                 onclick="toggleBundle(this)">
+              <div class="d-flex align-items-center gap-6">
+                
+                {% assign fallback_image = gift_product.featured_image %}
+                {% if gift_variant.featured_image != blank %}
+                  <img src="{{ gift_variant.featured_image | image_url: width: 150, height: 150, crop: 'center' }}"
+                    alt="Cadeau"
+                    width="75"
+                    height="75"
+                    class="img-fluid rounded text-opacity {{ block.settings.border }} {{ block.settings.shadow_sp }}">
+                {% elsif fallback_image != blank %}
+                  <img src="{{ fallback_image | image_url: width: 150, height: 150, crop: 'center' }}"
+                    alt="Cadeau"
+                    width="75"
+                    height="75"
+                    class="img-fluid rounded text-opacity {{ block.settings.border }} {{ block.settings.shadow_sp }}">
+                {% else %}
+                  <div style="width:75px;height:75px;background:#f5f5f5;display:flex;align-items:center;justify-content:center;border-radius:12px;">
+                    <span class="text-muted small">Pas d'image</span>
+                  </div>
+                {% endif %}
+  
+                <div class="d-flex flex-column justify-content-center text-opacity">
+                  <span class="fw-semibold small" style="">{{ 'product.qty_breaks_variants.label_gift' | t }}</span>
+                  <span class="small" style="">{{ gift_product.title }}</span>
+                </div>
+  
+                <div class="shopibundle-plus-icon text-opacity">
+                  <svg width="28" height="28" viewBox="0 0 32 32" fill="none">
+                    <circle cx="16" cy="16" r="16" fill="black"/>
+                    <line x1="16" y1="10" x2="16" y2="22" stroke="white" stroke-width="3" stroke-linecap="round"/>
+                    <line x1="10" y1="16" x2="22" y2="16" stroke="white" stroke-width="3" stroke-linecap="round"/>
+                  </svg>
+                </div>
+              </div>
+              <div class="text-end ms-auto">
+                <span class="text-opacity fw-bold small">
+                  {{ 0 | money }}
+                </span>
+                {% if gift_variant.compare_at_price and gift_variant.compare_at_price > 0 %}
+                  <span class="text-opacity text-decoration-line-through text-muted small ms-2">
+                    {{ gift_variant.compare_at_price | money }}
+                  </span>
+                {% else %}
+                  <span class="text-opacity text-decoration-line-through text-muted small ms-2">
+                    {{ gift_variant.price | money }}
+                  </span>
+                {% endif %}
+            
+                <!-- BADGE CADEAU -->
+                {% if block.settings.badge_text_gift != blank %}
+                  <div class="mt-2">
+                    <span class="bundle-badge badge badge-cadeau"
+                          style="background-color: {{ block.settings.badge_color_gift | default: '#f59f00' }}">
+                      {{ block.settings.badge_text_gift }}
+                    </span>
+                  </div>
+                {% endif %}
+            
+              </div>                   
+            </div>
+          {% endif %}
+
+        </div>
+      {% endfor %}
+    </div>
+
+    <div class="text-center mt-6">
+      <button id="add-to-cart-bundle-with-variants"
+              class="btn-atc-bundle btn {{ block.settings.btn_color }} w-100"
+              type="button"
+              onclick="submitSelectedBundle()"
+              data-text-add-to-cart="{{ 'product.qty_breaks_variants.add_to_cart' | t }}"
+              data-show-price="{{ block.settings.atc_btn_show_price }}">
+        {{ 'product.qty_breaks_variants.add_to_cart' | t }}
+      </button>
+    </div>
+    <div id="shopibundle-bundle-data"
+      data-bundle-variant-ids="[]"
+      data-gift-variant-id="{% if show_gift %}{{ gift_variant.id }}{% endif %}">
+    </div>
+
+  </div>
+{% endif %}

@@ -1,0 +1,32 @@
+{% if product.metafields.custom.spinning_text != blank %}
+    {% assign spinning_text_and_color = product.metafields.custom.spinning_text | split: ' : ' %}
+    {% assign final_spinning_label = spinning_text_and_color[0] | strip | replace: "  ", " " | replace: " ", "•" | append: "•" %}
+    {% assign text_color = spinning_text_and_color[1] | strip | default: "#000000" %}
+{% else %}
+    {% assign final_spinning_label = "" %}
+    {% assign text_color = "#000000" %}
+{% endif %}
+
+{% if section.settings.spinning_circle_show and final_spinning_label != blank %}
+    <div id="spinning-circle-{{ product.id }}" class="spinning-circle">
+        <div class="spinning-logo">
+            {% if product.metafields.custom.spinning_image != blank %}
+              <img
+                    class="img-fluid spinning-image"
+                    src="{{ product.metafields.custom.spinning_image | image_url: width: '180', height: '180' }}"
+                    alt="{{ product.metafields.custom.spinning_image.alt | escape }}"
+                    width="180"
+                    height="180"
+                    loading="lazy">
+            {% else %}
+                {{ product.metafields.custom.spinning_icon }}
+            {% endif %}
+        </div>
+        {% if final_spinning_label != blank %}
+            <div class="spinning-text">
+                <p style="color: {{ text_color }};">{{ final_spinning_label }}</p>
+            </div>
+        {% endif %}
+    </div>
+{% endif %}
+

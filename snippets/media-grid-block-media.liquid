@@ -1,0 +1,38 @@
+{% comment %}
+---------------------------------------------------------
+Copyright © 2019/2024 Theme Shopiweb Premium. Tous droits réservés.
+La copie, la modification, la distribution ou l'utilisation
+non autorisée de ce code ou de toute partie de celui-ci est formellement interdite.
+Les contrevenants seront poursuivis dans toute la mesure permise par la loi.
+---------------------------------------------------------
+{% endcomment %}
+
+{% liquid 
+  assign media_classes = '' 
+
+  assign media_classes = media_classes | append: block.settings.border | append: ' ' 
+
+  if block.settings.border != blank
+    assign media_classes = media_classes | append: block.settings.border_color | append: ' '
+    assign media_classes = media_classes | append: 'border-' | append: block.settings.border_width | append: ' '
+  endif
+
+  assign media_classes = media_classes | append: block.settings.shadow_sp | append: ' '
+  assign media_classes = media_classes | strip
+%}
+
+
+{% if block.settings.video != blank %}
+    {% assign video_classes = 'w-100 rounded ' | append: media_classes %}
+    {{ block.settings.video | video_tag: class: video_classes, image_size: '800x', autoplay: block.settings.autoplay, loop: block.settings.loop, muted: block.settings.muted, controls: block.settings.controls }}
+{% elsif block.settings.img != blank %}
+    <img
+        class="img-fluid rounded w-100 {{ media_classes }}"
+        src="{{ block.settings.img.src | image_url: width: 800 }}"
+        alt="{{ block.settings.img.alt | escape }}"
+        width="{{ 800 }}"
+        height="{{ 800 | divided_by: block.settings.img.aspect_ratio | round }}"
+        loading="lazy">
+{% else %}
+    {{ 'image' | placeholder_svg_tag }}
+{% endif %}
