@@ -1,0 +1,217 @@
+<!doctype html>
+<html
+    class="{% if settings.animations_on_scroll %}scroll-on-animations{% endif %}" 
+    {% if settings.browser_tab_enable %}data-inactive-tab-text="{{ settings.browser_tab_text }}"{% endif %}
+    lang="{{ request.locale.iso_code }}">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="theme-color" content="{{ settings.color_primary }}">
+
+    <link rel="canonical" href="{{ canonical_url }}">
+    <link rel="preconnect" href="https://cdn.shopify.com" crossorigin>
+    <link rel="preconnect" href="https://fonts.shopifycdn.com" crossorigin>
+
+    {%- unless settings.favicon == blank -%}
+        <link rel="icon" type="image/png" sizes="16x16" href="{{ settings.favicon | image_url: width: 16, height: 16, crop: 'center' }}">
+        <link rel="icon" type="image/png" sizes="32x32" href="{{ settings.favicon | image_url: width: 32, height: 32, crop: 'center' }}">
+        <link rel="apple-touch-icon" sizes="180x180" href="{{ settings.favicon | image_url: width: 180, height: 180, crop: 'center' }}">
+    {%- endunless -%}
+
+    <title>
+        {{ page_title }}
+        {%- if current_tags %} &ndash; tagged "{{ current_tags | join: ', ' }}"{% endif -%}
+        {%- if current_page != 1 %} &ndash; Page {{ current_page }}{% endif -%}
+        {%- unless page_title contains shop.name %} &ndash; {{ shop.name }}{% endunless -%}
+    </title>
+
+    {% if page_description %}
+        <meta name="description" content="{{ page_description | escape }}">
+    {% endif %}
+
+    {% render 'meta-tags' %}
+
+    {{ content_for_header }}
+
+    {% style %}
+    /* Code personnalisé ~ CSS */
+      {{ settings.code_css }}
+    {% endstyle%}
+
+    <style>
+        :root {
+            {% if settings.color_light.lightness > 50 %}
+                --bs-border-color: var(--bs-light-darken-10);
+            {% else %}
+                --bs-border-color: var(--bs-light-lighten-5);
+            {% endif %}
+        }
+    </style>
+
+    <link href="{{ 'vendor-bootstrap.min.css' | asset_url }}" rel="stylesheet">
+    <link href="{{ 'vendor-splide.min.css' | asset_url }}" rel="stylesheet" media="print" onload="this.media='all'">
+    <link href="{{ 'vendor-animate.min.css' | asset_url }}" rel="stylesheet" media="print" onload="this.media='all'">
+    <link href="{{ 'variables.css' | asset_url }}" rel="stylesheet">
+    <link href="{{ 'base.css' | asset_url }}" rel="stylesheet">
+    <link href="{{ 'general.css' | asset_url }}" rel="stylesheet">
+    <link href="{{ 'sections.css' | asset_url }}" rel="stylesheet">
+    <link href="{{ 'collection.css' | asset_url }}" rel="stylesheet">
+    <link href="{{ 'product.css' | asset_url }}" rel="stylesheet">
+    <link href="{{ 'cart.css' | asset_url }}" rel="stylesheet">
+    <link href="{{ 'custom.css' | asset_url }}" rel="stylesheet">
+
+    <script>
+        Shopify.money_format = "{{ shop.money_format }}"
+        window.theme = {
+            product: {
+                addToCart: '{{ 'product.add_to_cart' | t }}',
+                addedToCart: '{{ 'product.added_to_cart' | t }}',
+                soldOut: '{{ 'product.sold_out' | t }}',
+                unavailable: '{{ 'product.unavailable' | t }}',
+                priceRegular: '{{ 'product.price_regular' | t }}',
+                priceFrom: '{{ 'product.price_from' | t }}',
+                priceSale: '{{ 'product.price_sale' | t }}',
+                save: '{{ 'product.save' | t }}',
+            }
+        }
+    </script>
+
+    {% if request.page_type == 'collection' %}
+        <link href="{{ 'vendor-nouislider.min.css' | asset_url }}" rel="stylesheet" media="print" onload="this.media='all'">
+        <script src="{{ 'vendor-nouislider.min.js' | asset_url }}" defer></script>
+    {% endif %}
+
+    {% if request.page_type == 'product' %}
+        <link href="{{ 'vendor-glightbox.min.css' | asset_url }}" rel="stylesheet" media="print" onload="this.media='all'">
+        <script src="{{ 'vendor-glightbox.min.js' | asset_url }}" defer></script>
+    {% endif %}
+
+    <script src="{{ 'shopify_common.js' | shopify_asset_url }}" defer></script>
+    <script src="{{ 'vendor-bootstrap.bundle.min.js' | asset_url }}" defer></script>
+    <script src="{{ 'vendor-splide.min.js' | asset_url }}" defer></script>
+    <script src="{{ 'base.js' | asset_url }}" defer></script>
+    <script src="{{ 'general.js' | asset_url }}" defer></script>
+    <script src="{{ 'search.js' | asset_url }}" defer></script>
+    <script src="{{ 'sections.js' | asset_url }}" defer></script>
+    <script src="{{ 'collection.js' | asset_url }}" defer></script>
+    <script src="{{ 'product.js' | asset_url }}" defer></script>
+    <script src="{{ 'cart.js' | asset_url }}" defer></script>
+    <script src="{{ 'custom.js' | asset_url }}" defer></script>
+
+    {% if settings.wishlist_enable %}
+        <script src="{{ 'wishlist.js' | asset_url }}" defer></script>
+    {% endif %}
+
+    <!-- Code personnalisé ~ Javascript -->
+    {{ settings.code_javascript }}
+  
+    <!-- Code personnalisé ~ Head -->
+    {{ settings.code_head }}
+
+    {% if template == 'page.noindex-nofollow' %}
+        <meta name="robots" content="noindex, nofollow">
+    {% endif %}
+
+    <!-- Shopify Theme Version Tracker -->
+    {% assign theme_admin_name = "Shopiweb Premium" %}
+    {% assign theme_version = "1.8.0" %}
+    {% assign pages_count = pages | size %}
+    {% assign locale_count = shop.published_locales | size %}
+    {% assign locale_codes = '' %}
+    {% for locale in shop.published_locales %}
+      {% assign locale_codes = locale_codes | append: locale.iso_code %}
+      {% unless forloop.last %}
+        {% assign locale_codes = locale_codes | append: ',' %}
+      {% endunless %}
+    {% endfor %}
+
+    {% assign currencies_array = '' %}
+    {% assign seen_currencies = '' %}
+    
+    {% for country in localization.available_countries %}
+      {% assign currency_iso = country.currency.iso_code %}
+      {% assign currency_symbol = country.currency.symbol %}
+      {% assign currency_combo = currency_iso | append: ' (' | append: currency_symbol | append: ')' %}
+    
+      {% unless seen_currencies contains currency_combo %}
+        {% if currencies_array == '' %}
+          {% assign currencies_array = currency_combo %}
+        {% else %}
+          {% assign currencies_array = currencies_array | append: ', ' | append: currency_combo %}
+        {% endif %}
+        {% assign seen_currencies = seen_currencies | append: currency_combo | append: '|' %}
+      {% endunless %}
+    {% endfor %}
+    
+    <div id="shopify-theme-info"
+      data-theme-id="{{ theme.id }}"
+      data-theme-color="{{ settings.color_primary }}"
+      data-theme-name="{{ theme.name }}"
+      data-theme-admin-name="{{ theme_admin_name }}"
+      data-theme-version="{{ theme_version }}"
+      data-theme-role="{{ theme.role }}"
+      data-shop-name="{{ shop.name }}"
+      data-shop-domain="{{ shop.domain }}"
+      {%- unless settings.favicon == blank -%}
+        data-shop-favicon="{{ settings.favicon | image_url | prepend: 'https:' }}"
+      {%- else -%}
+        data-shop-favicon=""
+      {%- endunless -%}
+      data-font-body-family="{{ settings.font_body.family }}"
+      data-products-count="{{ shop.products_count }}"
+      data-collections-count="{{ shop.collections_count }}"
+      data-pages-count="{{ pages_count }}"
+      data-locale-count="{{ locale_count }}"
+      data-languages="{{ locale_codes }}"
+      data-shop-currency="{{ shop.currency }}"
+      data-shop-currencies="{{ currencies_array }}"
+      data-shop-myshopify-domain="{{ shop.permanent_domain }}"
+    >
+    </div>
+    
+</head>
+
+<body class="{{ request.page_type | prepend: 'page-type-' }}">
+    <a class="visually-hidden-focusable" href="#main">
+        {{ 'general.accessibility.skip_content' | t }}
+    </a>
+
+    {% if settings.enable-right-clic != false %}
+      {% render 'right-clic' %}
+    {% endif %}
+    {% if settings.enable_scroll_top_btn != false %}
+        {% render 'scroll-top' %}
+    {% endif %}
+    {% if settings.cooks != false %}
+     {% render 'cookie-popup' %}
+    {% endif %}
+    {% if settings.enable-text-selection != false %}
+      {% render 'text-selection' %}
+    {% endif %}
+    {% if settings.enable-image-drag != false %}
+      {% render 'image-drag' %}
+    {% endif %}
+    {% if settings.messengerchat != false %}
+      {% render 'messenger-chat' %}
+    {% endif %}
+    {% if settings.enable_whatsapp != false %}
+      {% render 'whatsapp-button' %}
+    {% endif %}
+  
+    {% sections 'header-group' %}
+
+    <main id="main">
+        {{ content_for_layout }}
+    </main>
+
+    {% sections 'footer-group' %}
+
+    {% liquid
+        render 'offcanvas-cart'
+        render 'offcanvas-search'
+        render 'offcanvas-wishlist'
+    %}
+
+</body>
+</html>
+    

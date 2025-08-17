@@ -1,0 +1,330 @@
+{% comment %}
+---------------------------------------------------------
+Copyright © 2019/2024 Theme Shopiweb Premium. Tous droits réservés.
+La copie, la modification, la distribution ou l'utilisation
+non autorisée de ce code ou de toute partie de celui-ci est formellement interdite.
+Les contrevenants seront poursuivis dans toute la mesure permise par la loi.
+---------------------------------------------------------
+{% endcomment %}
+
+{% liquid 
+    assign pt = section.settings.pt | prepend: 'pt-'
+    assign pb = section.settings.pb | prepend: 'pb-'
+    assign mt = section.settings.mt | prepend: 'mt-'
+    assign mb = section.settings.mb | prepend: 'mb-'
+
+    if section.settings.bg_type == 'custom'
+        assign text_color_class = section.settings.bg_color | split: " " | last
+        assign bg_class = 'content-bg-gradient ' | append: text_color_class
+    else
+        assign bg_class = section.settings.bg_color
+    endif
+
+    assign class = 'card-img ' | append: section.settings.video_bg_color
+
+    assign classes = ''
+    assign classes = classes | append: section.settings.border | append: ' '
+    assign classes = classes | append: section.settings.border_color | append: ' ' 
+    assign classes = classes | append: 'border-' | append: section.settings.border_width | append: ' ' 
+    assign classes = classes | append: section.settings.shadow_sp | append: ' ' 
+    assign classes = classes | strip
+
+    assign visibility = ''
+
+    if section.settings.visibility_xs == false
+        assign visibility = 'd-none'
+    endif
+
+    if section.settings.visibility_md
+        assign visibility = ' d-md-block' | prepend: visibility
+    else 
+        assign visibility = ' d-md-none' | prepend: visibility
+    endif
+
+    if section.settings.visibility_lg
+        assign visibility = ' d-lg-block' | prepend: visibility
+    else 
+        assign visibility = ' d-lg-none' | prepend: visibility
+    endif
+%}
+
+<style>
+.mp4-video video  {
+  --bs-card-inner-border-radius: calc(var(--bs-border-radius) - (var(--bs-border-shopiweb-width)));
+}
+</style>
+
+<section 
+    id="mp4-video-{{ section.id }}" 
+    class="mp4-video {{ bg_class }} {{ pt }} {{ pb }} {{ mt }} {{ mb }} {{ visibility }}"
+
+    {% if section.settings.bg_type == 'custom' %}
+        style="background: {{ section.settings.bg_gradient_color }};"
+    {% endif %}>
+  
+    <div class="{{ section.settings.container }}">
+        <div class="mx-auto rounded {{ classes }}"
+            {% if section.settings.container == 'container-fluid' %}
+                style="max-width: {{ section.settings.max_width }}px;"
+            {% endif %}>
+            {% if section.settings.video == blank %}
+               {{ 'hero-apparel-1' | placeholder_svg_tag: 'placeholder-svg rounded' }}
+            {% else %}
+               <div class="ratio {{ section.settings.ratio }}">
+                   {{ section.settings.video | video_tag: class: class, image_size: '1200x', autoplay: section.settings.autoplay, loop: section.settings.loop, muted: section.settings.muted, controls: section.settings.controls }}
+               </div>
+            {% endif %}
+        </div>
+    </div>
+</section>
+
+{% schema %}
+{
+    "name": "Video interne",
+    "settings": [
+        {
+            "type": "paragraph", 
+            "content": "Documentation FR : [Video Interne by Shopiweb](https:\/\/www.docs.shopiweb.fr\/theme-premium\/documentation\/sections\/video-interne)"
+        },
+        {
+            "type": "video",
+            "id": "video",
+            "label": "Vidéo"
+        },
+        {
+            "type": "header",
+            "content": "Général"
+        },
+        {
+            "type": "select",
+            "id": "bg_type",
+            "label": "Type d'arrière-plan",
+            "default": "predefined",
+            "options": [
+                { "value": "predefined", "label": "Couleur" },
+                { "value": "custom", "label": "Fondu" }
+            ]
+        },
+        {
+            "type": "select",
+            "id": "bg_color",
+            "label": "Couleur d'arrière plan",
+            "default": "bg-body text-body",
+            "options": [
+                { "group": "Principal", "value": "bg-primary text-white", "label": "Primaire (Texte blanc)" },
+                { "group": "Principal", "value": "bg-secondary text-white", "label": "Secondaire (Texte blanc)" },
+                { "group": "Principal", "value": "bg-tertiary text-white", "label": "Tertiaire (Texte blanc)" },
+                { "group": "Intermédiaire", "value": "bg-white text-dark", "label": "Blanc (Texte noir)" },
+                { "group": "Intermédiaire", "value": "bg-light text-body", "label": "Claire (Texte noir)" },
+                { "group": "Intermédiaire", "value": "bg-dark text-white", "label": "Sombre (Texte blanc)" },
+                { "group": "Par défaut", "value": "bg-body text-body", "label": "Corps (body) (Texte noir)" }
+            ],
+            "info": "S'applique également au texte si vous sélectionnez un dégradé personnalisé."
+        },
+        {
+            "type": "color_background",
+            "id": "bg_gradient_color",
+            "label": "Dégradé personnalisé",
+            "default": "linear-gradient(180deg, #6c757d 0%, #343a40 100%)",
+            "visible_if": "{{ section.settings.bg_type == 'custom' }}"
+        },
+        {
+            "type": "header",
+            "content": "Mise en page"
+        },
+        {
+            "type": "select",
+            "id": "container",
+            "label": "Conteneur",
+            "default": "container",
+            "options": [
+                { "value": "container", "label": "Page" },
+                { "value": "container-fluid", "label": "Personnalisé" }
+            ]
+        },
+        {
+            "type": "text",
+            "id": "max_width",
+            "label": "Largeur max. (px)",
+            "default": "991",
+            "visible_if": "{{ section.settings.container == 'container-fluid' }}"
+        },
+        {
+            "type": "header",
+            "content": "Vidéo"
+        },
+        {
+            "type": "select",
+            "id": "ratio",
+            "label": "Aspect ratio",
+            "default": "ratio-16x9",
+            "options": [
+                { "group": "Carré", "value": "ratio-1x1", "label": "1x1" },
+                { "group": "Horizontal", "value": "ratio-4x3", "label": "4x3" },
+                { "group": "Horizontal", "value": "ratio-16x9", "label": "16x9" },
+                { "group": "Horizontal", "value": "ratio-21x9", "label": "21x9" },
+                { "group": "Vertical", "value": "ratio-3x4", "label": "3x4" },
+                { "group": "Vertical", "value": "ratio-9x16", "label": "9x16" },
+                { "group": "Vertical", "value": "ratio-9x21", "label": "9x21" }
+            ] 
+        },
+        {
+            "type": "select",
+            "id": "video_bg_color",
+            "label": "Couleur du fond de la vidéo",
+            "default": "bg-black",
+            "options": [
+                { "value": "bg-transparent", "label": "Transparent" },
+                { "value": "bg-white", "label": "Blanc" },
+                { "value": "bg-black", "label": "Sombre" }
+            ] 
+        },
+        {
+            "type": "select",
+            "id": "border",
+            "label": "Bordure de l'image",
+            "default": "border",
+            "options": [
+                { "value": "", "label": "Aucune" },
+                { "value": "border", "label": "Bordure" }
+            ]
+        },
+        {
+            "type": "select",
+            "id": "border_color",
+            "label": "Couleur de la bordure",
+            "options": [
+                { "value": "", "label": "Default" },
+                { "value": "border-primary", "label": "Primaire" },
+                { "value": "border-secondary", "label": "Secondaire" },
+                { "value": "border-tertiary", "label": "Tertiaire" },
+                { "value": "border-dark", "label": "Sombre" },
+                { "value": "border-success", "label": "Succès" },
+                { "value": "border-warning", "label": "Avertissement" },
+                { "value": "border-danger", "label": "Danger" },
+                { "value": "border-info", "label": "Info" }
+            ],
+            "default": "",
+            "visible_if": "{{ section.settings.border == 'border' }}"
+        },
+        {
+            "type": "range",
+            "id": "border_width",
+            "label": "Largeur de la bordure",
+            "min": 1,
+            "max": 10,
+            "step": 1,
+            "default": 1,
+            "visible_if": "{{ section.settings.border == 'border' }}"
+        },
+        {
+            "type": "select",
+            "id": "shadow_sp",
+            "label": "Ombre",
+            "options": [
+                { "value": "shadow-none", "label": "Aucune" },
+                { "value": "shadow-1", "label": "Ombre légère" },
+                { "value": "shadow-2", "label": "Ombre partiel" },
+                { "value": "shadow-3", "label": "Ombre profonde" },
+                { "value": "shadow-4", "label": "Ombre totale" }
+            ],
+            "default": "shadow-1"
+        },
+        {
+            "type": "checkbox",
+            "id": "autoplay",
+            "label": "Autoplay",
+            "default": true
+        },
+        {
+            "type": "checkbox",
+            "id": "loop",
+            "label": "Loop",
+            "info": "(Vidéo en boucle)",
+            "default": true
+        },
+        {
+            "type": "checkbox",
+            "id": "muted",
+            "label": "Mute",
+            "info": "(Vidéo muette)",
+            "default": true
+        },
+        {
+            "type": "checkbox",
+            "id": "controls",
+            "label": "Contrôles",
+            "default": true
+        },
+        {
+            "type": "header",
+            "content": "Espacement de la section"
+        },
+        {
+            "type": "range",
+            "id": "pt",
+            "label": "Haut interne",
+            "min": 0,
+            "max": 20,
+            "step": 1,
+            "default": 0
+        },
+        {
+            "type": "range",
+            "id": "pb",
+            "label": "Bas interne",
+            "min": 0,
+            "max": 20,
+            "step": 1,
+            "default": 0
+        },
+        {
+            "type": "range",
+            "id": "mt",
+            "label": "Haut externe",
+            "min": 0,
+            "max": 20,
+            "step": 1,
+            "default": 0
+        },
+        {
+            "type": "range",
+            "id": "mb",
+            "label": "Bas externe",
+            "min": 0,
+            "max": 20,
+            "step": 1,
+            "default": 0
+        },
+        {
+            "type": "header",
+            "content": "Visibilité",
+            "info": "Afficher/masquer cette section en fonction de la résolution de l'écran"
+        },
+        {
+            "type": "checkbox",
+            "id": "visibility_xs",
+            "label": "Afficher sur mobile",
+            "default": true
+        },
+        {
+            "type": "checkbox",
+            "id": "visibility_md",
+            "label": "Afficher sur tablette",
+            "default": true
+        },
+        {
+            "type": "checkbox",
+            "id": "visibility_lg",
+            "label": "Afficher sur bureau",
+            "default": true
+        }
+    ],
+    "presets": [
+        {
+            "name": "Vidéo interne",
+            "category": "Média & Interaction"
+        }
+    ]
+}
+{% endschema %}

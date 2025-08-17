@@ -1,0 +1,493 @@
+{% comment %}
+---------------------------------------------------------
+Copyright © 2019/2024 Theme Shopiweb Premium. Tous droits réservés.
+La copie, la modification, la distribution ou l'utilisation
+non autorisée de ce code ou de toute partie de celui-ci est formellement interdite.
+Les contrevenants seront poursuivis dans toute la mesure permise par la loi.
+---------------------------------------------------------
+{% endcomment %}
+
+{% liquid 
+    assign pt = section.settings.pt | prepend: 'pt-'
+    assign pb = section.settings.pb | prepend: 'pb-'
+    assign mt = section.settings.mt | prepend: 'mt-'
+    assign mb = section.settings.mb | prepend: 'mb-'
+
+    if section.settings.bg_type == 'custom'
+        assign text_color_class = section.settings.bg_color | split: " " | last
+        assign bg_class = 'content-bg-gradient ' | append: text_color_class
+    elsif section.settings.bg_type == 'image'
+        assign bg_class = section.settings.bg_color | split: " " | last
+    else
+        assign bg_class = section.settings.bg_color
+    endif
+
+    assign classes_mobile = ''
+    assign classes_mobile = classes_mobile | append: section.settings.img_style_mobile | append: ' ' 
+    assign classes_mobile = classes_mobile | append: section.settings.border_mobile | append: ' '
+    assign classes_mobile = classes_mobile | append: section.settings.border_color_mobile | append: ' ' 
+    assign classes_mobile = classes_mobile | append: 'border-' | append: section.settings.border_width_mobile | append: ' ' 
+    assign classes_mobile = classes_mobile | append: section.settings.shadow_sp_mobile | append: ' ' 
+    assign classes_mobile = classes_mobile | strip
+
+    assign classes_desktop = ''
+    assign classes_desktop = classes_desktop | append: section.settings.img_style_desktop | append: ' ' 
+    assign classes_desktop = classes_desktop | append: section.settings.border_desktop | append: ' '
+    assign classes_desktop = classes_desktop | append: section.settings.border_color_desktop | append: ' ' 
+    assign classes_desktop = classes_desktop | append: 'border-' | append: section.settings.border_width_desktop | append: ' ' 
+    assign classes_desktop = classes_desktop | append: section.settings.shadow_sp_desktop | append: ' ' 
+    assign classes_desktop = classes_desktop | strip
+
+    assign visibility = ''
+
+    if section.settings.visibility_xs == false
+        assign visibility = 'd-none'
+    endif
+
+    if section.settings.visibility_md
+        assign visibility = ' d-md-block' | prepend: visibility
+    else 
+        assign visibility = ' d-md-none' | prepend: visibility
+    endif
+
+    if section.settings.visibility_lg
+        assign visibility = ' d-lg-block' | prepend: visibility
+    else 
+        assign visibility = ' d-lg-none' | prepend: visibility
+    endif
+%}
+
+<section 
+    id="simple-image-{{ section.id }}" 
+    class="simple-image enter-view {{ bg_class }} {{ pt }} {{ pb }} {{ mt }} {{ mb }} {{ visibility }}"
+
+    {% if section.settings.bg_type == 'image' %}
+        style="background-image: url('{{ section.settings.background_img.src | image_url }}'); 
+               background-size: cover; 
+               background-repeat: no-repeat; 
+               background-position: center center;
+               position: relative;"
+    {% elsif section.settings.bg_type == 'custom' %}
+        style="background: {{ section.settings.bg_gradient_color }};"
+    {% endif %}>
+
+    {% if section.settings.bg_type == 'image' %}
+        <div class="background-overlay" 
+             style="background: rgba(0, 0, 0, {{ section.settings.background_img_opacity }});">
+        </div>
+        <div class="background-overlay-blur" 
+             style="backdrop-filter: blur({{ section.settings.background_img_blur }}px);
+                    -webkit-backdrop-filter: blur({{ section.settings.background_img_blur }}px);">
+        </div>
+    {% endif %}
+  
+    <div class="{{ section.settings.container }}">
+        <div class="mx-auto" 
+            {% if section.settings.container == 'container-fluid' %}
+                style="max-width: {{ section.settings.max_width }}px;"
+            {% endif %}>
+            <div 
+                class="animate__animated animate__faster opacity-0 position-relative z-index-1"
+                data-animate-class="animate__fadeIn"
+                style="animation-delay: 0ms">
+                {% if section.settings.image_mobile == blank and section.settings.image_desktop == blank %}
+                    {{ 'detailed-apparel-1' | placeholder_svg_tag: 'placeholder-svg rounded bg-light' }}
+                {% else %}
+                    {% unless section.settings.url == blank %}
+                        <a href="{{ section.settings.url }}">
+                    {% endunless %}
+                        <div class="d-lg-none">
+                            <img
+                                class="img-fluid {{ classes_mobile }}"
+                                src="{{ section.settings.image_mobile.src | image_url: width: section.settings.img_mobile_width, height: section.settings.img_mobile_height, crop: section.settings.img_mobile_crop }}"
+                                alt="{{ section.settings.image_mobile.alt | escape }}"
+                                width="{{ section.settings.img_mobile_width }}"
+                                height="{{ section.settings.img_mobile_height }}"
+                                loading="lazy">
+                        </div>
+                        <div class="d-none d-lg-block">
+                            <img
+                                class="img-fluid {{ classes_desktop }}"
+                                src="{{ section.settings.image_desktop.src | image_url: width: section.settings.img_desktop_width, height: section.settings.img_desktop_height, crop: section.settings.img_desktop_crop }}"
+                                alt="{{ section.settings.image_desktop.alt | escape }}"
+                                width="{{ section.settings.img_desktop_width }}"
+                                height="{{ section.settings.img_desktop_height }}"
+                                loading="lazy">
+                        </div>
+                    {% unless section.settings.url == blank %}
+                        </a>
+                    {% endunless %}
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</section>
+
+{% schema %} 
+{
+    "name": "Image",
+    "settings": [
+        {
+            "type": "paragraph", 
+            "content": "Documentation FR : [Image by Shopiweb](https:\/\/www.docs.shopiweb.fr\/theme-premium\/documentation\/sections\/image)"
+        },
+        {
+            "type": "header",
+            "content": "Général"
+        },
+        {
+            "type": "select",
+            "id": "bg_type",
+            "label": "Type d'arrière-plan",
+            "default": "predefined",
+            "options": [
+                { "value": "predefined", "label": "Couleur" },
+                { "value": "custom", "label": "Fondu" },
+                { "value": "image", "label": "Image" }
+            ]
+        },
+        {
+            "type": "select",
+            "id": "bg_color",
+            "label": "Couleur d'arrière plan",
+            "default": "bg-body text-body",
+            "options": [
+                { "group": "Principal", "value": "bg-primary text-white", "label": "Primaire (Texte blanc)" },
+                { "group": "Principal", "value": "bg-secondary text-white", "label": "Secondaire (Texte blanc)" },
+                { "group": "Principal", "value": "bg-tertiary text-white", "label": "Tertiaire (Texte blanc)" },
+                { "group": "Intermédiaire", "value": "bg-white text-dark", "label": "Blanc (Texte noir)" },
+                { "group": "Intermédiaire", "value": "bg-light text-body", "label": "Claire (Texte noir)" },
+                { "group": "Intermédiaire", "value": "bg-dark text-white", "label": "Sombre (Texte blanc)" },
+                { "group": "Par défaut", "value": "bg-body text-body", "label": "Corps (body) (Texte noir)" }
+            ],
+            "info": "S'applique également au texte si vous sélectionnez un dégradé personnalisé."
+        },
+        {
+            "type": "color_background",
+            "id": "bg_gradient_color",
+            "label": "Dégradé personnalisé",
+            "default": "linear-gradient(180deg, #6c757d 0%, #343a40 100%)",
+            "visible_if": "{{ section.settings.bg_type == 'custom' }}"
+        },
+        {
+            "type": "image_picker",
+            "id": "background_img",
+            "label": "Image d'arrière-plan",
+            "visible_if": "{{ section.settings.bg_type == 'image' }}"
+        },
+        {
+            "type": "range",
+            "id": "background_img_opacity",
+            "label": "Opacité",
+            "min": 0,
+            "max": 1,
+            "step": 0.1,
+            "default": 0.3,
+            "visible_if": "{{ section.settings.bg_type == 'image' }}"
+        },
+        {
+            "type": "range",
+            "id": "background_img_blur",
+            "label": "Flou",
+            "min": 0,
+            "max": 10,
+            "step": 1,
+            "default": 0,
+            "visible_if": "{{ section.settings.bg_type == 'image' }}"
+        },
+        {
+            "type": "header",
+            "content": "Mise en page"
+        },
+        {
+            "type": "select",
+            "id": "container",
+            "label": "Conteneur",
+            "default": "container",
+            "options": [
+                { "value": "container", "label": "Page" },
+                { "value": "container-fluid", "label": "Personnalisé" }
+            ]
+        },
+        {
+            "type": "text",
+            "id": "max_width",
+            "label": "Largeur max. (px)",
+            "default": "991",
+            "visible_if": "{{ section.settings.container == 'container-fluid' }}"
+        },
+        {
+            "type": "url",
+            "id": "url",
+            "label": "URL (lien)"
+        },
+        {
+            "type": "header",
+            "content": "Image (mobile)"
+        },
+        {
+            "type": "image_picker",
+            "id": "image_mobile",
+            "label": "Image"
+        },
+        {
+            "type": "text",
+            "id": "img_mobile_width",
+            "label": "Largeur image (px)",
+            "default": "900"
+        },
+        {
+            "type": "text",
+            "id": "img_mobile_height",
+            "label": "Hauteur image (px)",
+            "default": "600"
+        },
+        {
+            "type": "select",
+            "id": "img_mobile_crop",
+            "label": "Image crop",
+            "default": "center",
+            "options": [
+                { "value": "top", "label": "Top" },
+                { "value": "center", "label": "Center" },
+                { "value": "bottom", "label": "Bottom" },
+                { "value": "left", "label": "Left" },
+                { "value": "right", "label": "Right" }
+            ]
+        },
+        {
+            "type": "select",
+            "id": "img_style_mobile",
+            "label": "Style d'angle",
+            "options": [
+              { "value": "rounded-0", "label": "Pas d'arrondi" },
+              { "value": "rounded", "label": "Image arrondi complet" },
+              { "value": "rounded-top", "label": "Image arrondi en haut" },
+              { "value": "rounded-bottom", "label": "Image arrondi en bas" },
+              { "value": "rounded-start", "label": "Image arrondi à gauche" },
+              { "value": "rounded-end", "label": "Image arrondi à droite" }
+            ],
+            "default": "rounded"
+        },
+        {
+            "type": "select",
+            "id": "border_mobile",
+            "label": "Bordure de l'image",
+            "default": "border",
+            "options": [
+                { "value": "", "label": "Aucune" },
+                { "value": "border", "label": "Bordure" }
+            ]
+        },
+        {
+            "type": "select",
+            "id": "border_color_mobile",
+            "label": "Couleur de la bordure",
+            "options": [
+                { "value": "", "label": "Default" },
+                { "value": "border-primary", "label": "Primaire" },
+                { "value": "border-secondary", "label": "Secondaire" },
+                { "value": "border-tertiary", "label": "Tertiaire" },
+                { "value": "border-dark", "label": "Sombre" },
+                { "value": "border-success", "label": "Succès" },
+                { "value": "border-warning", "label": "Avertissement" },
+                { "value": "border-danger", "label": "Danger" },
+                { "value": "border-info", "label": "Info" }
+            ],
+            "default": "",
+            "visible_if": "{{ section.settings.border_mobile == 'border' }}"
+        },
+        {
+            "type": "range",
+            "id": "border_width_mobile",
+            "label": "Largeur de la bordure",
+            "min": 1,
+            "max": 10,
+            "step": 1,
+            "default": 1,
+            "visible_if": "{{ section.settings.border_mobile == 'border' }}"
+        },
+        {
+            "type": "select",
+            "id": "shadow_sp_mobile",
+            "label": "Ombre",
+            "options": [
+                { "value": "shadow-none", "label": "Aucune" },
+                { "value": "shadow-1", "label": "Ombre légère" },
+                { "value": "shadow-2", "label": "Ombre partiel" },
+                { "value": "shadow-3", "label": "Ombre profonde" },
+                { "value": "shadow-4", "label": "Ombre totale" }
+            ],
+            "default": "shadow-1"
+        },
+        {
+            "type": "header",
+            "content": "Image (bureau)"
+        },
+        {
+            "type": "image_picker",
+            "id": "image_desktop",
+            "label": "Image"
+        },
+        {
+            "type": "text",
+            "id": "img_desktop_width",
+            "label": "Largeur image (px)",
+            "default": "1600"
+        },
+        {
+            "type": "text",
+            "id": "img_desktop_height",
+            "label": "Hauteur image (px)",
+            "default": "900"
+        },
+        {
+            "type": "select",
+            "id": "img_desktop_crop",
+            "label": "Recadrage de l'image",
+            "default": "center",
+            "options": [
+                { "value": "top", "label": "Haut" },
+                { "value": "center", "label": "Centre" },
+                { "value": "bottom", "label": "Bas" },
+                { "value": "left", "label": "Gauche" },
+                { "value": "right", "label": "Droite" }
+            ]
+        },
+        {
+            "type": "select",
+            "id": "img_style_desktop",
+            "label": "Style d'angle",
+            "options": [
+              { "value": "rounded-0", "label": "Pas d'arrondi" },
+              { "value": "rounded", "label": "Image arrondi complet" },
+              { "value": "rounded-top", "label": "Image arrondi en haut" },
+              { "value": "rounded-bottom", "label": "Image arrondi en bas" },
+              { "value": "rounded-start", "label": "Image arrondi à gauche" },
+              { "value": "rounded-end", "label": "Image arrondi à droite" }
+            ],
+            "default": "rounded"
+        },
+        {
+            "type": "select",
+            "id": "border_desktop",
+            "label": "Bordure de l'image",
+            "default": "border",
+            "options": [
+                { "value": "", "label": "Aucune" },
+                { "value": "border", "label": "Bordure" }
+            ]
+        },
+        {
+            "type": "select",
+            "id": "border_color_desktop",
+            "label": "Couleur de la bordure",
+            "options": [
+                { "value": "", "label": "Default" },
+                { "value": "border-primary", "label": "Primaire" },
+                { "value": "border-secondary", "label": "Secondaire" },
+                { "value": "border-tertiary", "label": "Tertiaire" },
+                { "value": "border-dark", "label": "Sombre" },
+                { "value": "border-success", "label": "Succès" },
+                { "value": "border-warning", "label": "Avertissement" },
+                { "value": "border-danger", "label": "Danger" },
+                { "value": "border-info", "label": "Info" }
+            ],
+            "default": "",
+            "visible_if": "{{ section.settings.border_desktop == 'border' }}"
+        },
+        {
+            "type": "range",
+            "id": "border_width_desktop",
+            "label": "Largeur de la bordure",
+            "min": 1,
+            "max": 10,
+            "step": 1,
+            "default": 1,
+            "visible_if": "{{ section.settings.border_desktop == 'border' }}"
+        },
+        {
+            "type": "select",
+            "id": "shadow_sp_desktop",
+            "label": "Ombre",
+            "options": [
+                { "value": "shadow-none", "label": "Aucune" },
+                { "value": "shadow-1", "label": "Ombre légère" },
+                { "value": "shadow-2", "label": "Ombre partiel" },
+                { "value": "shadow-3", "label": "Ombre profonde" },
+                { "value": "shadow-4", "label": "Ombre totale" }
+            ],
+            "default": "shadow-1"
+        },
+        {
+            "type": "header",
+            "content": "Espacement de la section"
+        },
+        {
+            "type": "range",
+            "id": "pt",
+            "label": "Haut interne",
+            "min": 0,
+            "max": 20,
+            "step": 1,
+            "default": 0
+        },
+        {
+            "type": "range",
+            "id": "pb",
+            "label": "Bas interne",
+            "min": 0,
+            "max": 20,
+            "step": 1,
+            "default": 0
+        },
+        {
+            "type": "range",
+            "id": "mt",
+            "label": "Haut externe",
+            "min": 0,
+            "max": 20,
+            "step": 1,
+            "default": 0
+        },
+        {
+            "type": "range",
+            "id": "mb",
+            "label": "Bas externe",
+            "min": 0,
+            "max": 20,
+            "step": 1,
+            "default": 0
+        },
+        {
+            "type": "header",
+            "content": "Visibilité",
+            "info": "Afficher/masquer cette section en fonction de la résolution de l'écran"
+        },
+        {
+            "type": "checkbox",
+            "id": "visibility_xs",
+            "label": "Afficher sur mobile",
+            "default": true
+        },
+        {
+            "type": "checkbox",
+            "id": "visibility_md",
+            "label": "Afficher sur tablette",
+            "default": true
+        },
+        {
+            "type": "checkbox",
+            "id": "visibility_lg",
+            "label": "Afficher sur bureau",
+            "default": true
+        }
+    ],
+    "presets": [
+        {
+            "name": "Image",
+            "category": "Inspiration"
+        }
+    ]
+}
+{% endschema %}

@@ -1,0 +1,1197 @@
+{% comment %}
+---------------------------------------------------------
+Copyright © 2019/2024 Theme Shopiweb Premium. Tous droits réservés.
+La copie, la modification, la distribution ou l'utilisation
+non autorisée de ce code ou de toute partie de celui-ci est formellement interdite.
+Les contrevenants seront poursuivis dans toute la mesure permise par la loi.
+---------------------------------------------------------
+{% endcomment %}
+
+{%- style -%}
+  
+  /* SVG Border Shopiweb */
+  
+  #carousel-{{ section.id }} .diapo_svg {
+    width: 100%;
+    bottom: -1px;
+    left: 0;
+    position: absolute;
+    overflow: hidden;
+    line-height: 0;
+    background: rgba(0,0,0,0);
+    z-index: 2;
+  }
+  #carousel-{{ section.id }} .diapo_svg svg {
+      display: block;
+    }
+
+  #carousel-{{ section.id }} .diapo_svg svg * {
+      fill: {{ section.settings.color_diapo-svg }};
+    }
+  
+  @media screen and (min-width: 768px) {
+  #carousel-{{ section.id }} .diapo_svg svg {
+      position: relative;
+      width: calc(100% + 1.3px);
+      height: {{ section.settings.deskheight_diapo-svg }}px;
+    }
+  }
+  @media screen and (max-width: 768px) {
+    #carousel-{{ section.id }} .diapo_svg svg {
+      position: relative;
+      width: calc(100% + 1.3px);
+      height: {{ section.settings.mobheight_diapo-svg }}px;
+    }
+  }
+
+  .carousel-indicators {
+      z-index: 3;
+  }
+{%- endstyle -%}
+
+
+{% liquid
+    assign mt = section.settings.mt | prepend: 'mt-'
+    assign mb = section.settings.mb | prepend: 'mb-'
+
+    assign btn_shadow_sp = settings.btn_shadow_sp
+%}
+
+<section 
+    id="carousel-{{ section.id }}" 
+    class="
+        carousel bg-dark enter-view 
+        {{ section.settings.animation }} 
+        {{ section.settings.controls_style }} 
+        {{ section.settings.indicators_style }} 
+        {% if section.settings.ken_burns %}carousel-ken-burns{% endif %}
+        {{ mt }} {{ mb }}
+    "
+    data-bs-ride="{% if section.settings.autoplay %}carousel{% else %}false{% endif %}">
+    {% if section.settings.indicators and section.blocks.size > 1 %}
+        <div class="carousel-indicators">
+            {% for block in section.blocks %}
+                <button 
+                    type="button" 
+                    data-bs-target="#carousel-{{ section.id }}" 
+                    data-bs-slide-to="{{ forloop.index0 }}" 
+                    class="{% if forloop.first == true %}active{% endif %}" 
+                    aria-current="{% if forloop.first == true %}true{% endif %}" 
+                    aria-hidden="true">
+                </button>
+            {% endfor %}
+        </div>
+    {% endif %}
+    <div class="carousel-inner">
+        {% for block in section.blocks %}
+            {% if block.type == 'video' %}
+                <div class="carousel-item {% if forloop.first == true %}active{% endif %}" data-index="{{ forloop.index0 }}" {{ block.shopify_attributes }}>
+                    {% unless block.settings.slide_link == blank %}
+                        <a href="{{ block.settings.slide_link }}" class="carousel-item-link"> 
+                    {% endunless %}
+                        {% if block.settings.video_mobile == blank and block.settings.video_desktop == blank %}
+                            {% capture current %}{% cycle 1, 2 %}{% endcapture %}
+                            {{ 'hero-apparel-' | append: current | placeholder_svg_tag: 'placeholder-svg bg-secondary' }}
+                        {% else %}
+                            <div class="d-lg-none">
+                                <video
+                                    class="carousel-item-video lazy-video"
+                                    autoplay playsinline loop muted preload="metadata"
+                                    aria-label="{{ block.settings.video_mobile.alt }}" 
+                                    poster="{{ block.settings.video_mobile.preview_image | image_url: width: 960 }}"
+                                    style="height: {% if block.settings.video_mobile_height > 0 %}{{ block.settings.video_mobile_height }}px;{% else %}auto;{% endif %}
+                                           opacity: {{ block.settings.video_mobile_opacity }};">
+                                    {% for source in block.settings.video_mobile.sources %}
+                                        <source 
+                                            data-src="{{ source.url }}" 
+                                            type="{{ source.mime_type }}">
+                                    {% endfor %}
+                                    {% comment %}theme-check-disable ImgLazyLoading{% endcomment %}
+                                        <img 
+                                            src="{{ block.settings.video_mobile.preview_image | image_url: width: 960 }}"
+                                            width="960"
+                                            height="{{ 960 | divided_by: block.settings.video_mobile.preview_image.aspect_ratio | round }}"
+                                            alt="{{ block.settings.video_mobile.preview_image.alt }}" 
+                                            loading="{% if section.settings.lazyload %}lazy{% else %}eager{% endif %}"
+                                            fetchpriority="{% if forloop.first %}high{% else %}low{% endif %}">
+                                    {% comment %}theme-check-enable ImgLazyLoading{% endcomment %}
+                                </video>
+                            </div>
+                            <div class="d-none d-lg-block">
+                                <video
+                                    class="carousel-item-video lazy-video"
+                                    autoplay playsinline loop muted preload="metadata"
+                                    aria-label="{{ block.settings.video_desktop.alt }}" 
+                                    poster="{{ block.settings.video_desktop.preview_image | image_url: width: 1920 }}"
+                                    style="height: {% if block.settings.video_desktop_height > 0 %}{{ block.settings.video_desktop_height }}px;{% else %}auto;{% endif %}
+                                           opacity: {{ block.settings.video_desktop_opacity }};"
+                                    fetchpriority="{% if forloop.first %}high{% else %}low{% endif %}">
+                                    {% for source in block.settings.video_desktop.sources %}
+                                        <source 
+                                            data-src="{{ source.url }}" 
+                                            type="{{ source.mime_type }}">
+                                    {% endfor %}
+                                    {% comment %}theme-check-disable ImgLazyLoading{% endcomment %}
+                                        <img 
+                                            src="{{ block.settings.video_desktop.preview_image | image_url: width: 1920 }}"
+                                            width="1920"
+                                            height="{{ 1920 | divided_by: block.settings.video_desktop.preview_image.aspect_ratio | round }}"
+                                            alt="{{ block.settings.video_desktop.preview_image.alt }}" 
+                                            loading="{% if section.settings.lazyload %}lazy{% else %}eager{% endif %}">
+                                    {% comment %}theme-check-enable ImgLazyLoading{% endcomment %}
+                                </video>
+                            </div>
+                        {% endif %}
+                        {% if block.settings.video_mobile_blur > 0 or block.settings.video_desktop_blur %}
+                            <div class="carousel-item-blur d-lg-none" style="backdrop-filter: blur({{ block.settings.video_mobile_blur }}px); -webkit-backdrop-filter: blur({{ block.settings.video_mobile_blur }}px);">
+                            </div>
+                            <div class="carousel-item-blur d-none d-lg-block" style="backdrop-filter: blur({{ block.settings.video_desktop_blur }}px); -webkit-backdrop-filter: blur({{ block.settings.video_desktop_blur }}px);">
+                            </div>
+                        {% endif %}
+                        {% unless block.settings.title == blank %}
+                            <div class="carousel-caption {{ block.settings.caption_position_mobile }} {{ block.settings.caption_position_desktop }}"
+                                 style="color: {{ block.settings.caption_color }};">
+                                <div class="" style="max-width: {{ block.settings.caption_max_width }}px">
+                                    {% unless block.settings.subtitle_img == blank %}
+                                        <div 
+                                            class="animate__animated animate__faster opacity-0"
+                                              data-animate-class="animate__fadeInDown"
+                                              style="animation-delay: 1200ms;">
+                                                <img
+                                                    class="img-fluid mb-5"
+                                                    src="{{ block.settings.subtitle_img.src | image_url: width: block.settings.brand_image_size }}"
+                                                    alt="{{ block.settings.subtitle_img.alt | escape }}"
+                                                    width="{{ block.settings.brand_image_size }}"
+                                                    height="auto"
+                                                    loading="lazy">
+                                            </div>
+                                    {% endunless %}
+                                    {% unless block.settings.subtitle == blank %}
+                                        <div 
+                                            class="animate__animated animate__faster opacity-0"
+                                            data-animate-class="animate__fadeInDown"
+                                            style="animation-delay: 1000ms;">
+                                            <div class="subtitle mb-3 {{ block.settings.subtitle_size }}">
+                                                {{ block.settings.subtitle }}
+                                            </div>
+                                        </div>
+                                    {% endunless %}
+                                    <div 
+                                        class="animate__animated animate__faster opacity-0"
+                                        data-animate-class="animate__fadeInUp"
+                                        style="animation-delay: 400ms;">
+                                        <{{ block.settings.heading_tag }} class="title mb-3 {{ block.settings.title_size }}">
+                                            {{ block.settings.title }}
+                                        </{{ block.settings.heading_tag }}>
+                                    </div>
+                                    {% unless block.settings.description == blank %}
+                                        <div 
+                                            class="animate__animated animate__faster opacity-0"
+                                            data-animate-class="animate__fadeInUp"
+                                            style="animation-delay: 600ms;">
+                                            <div class="description rte mb-6 {{ block.settings.description_size }}">
+                                                {{ block.settings.description }}
+                                            </div>
+                                        </div>
+                                    {% endunless %}
+                                    <div 
+                                        class="animate__animated animate__faster opacity-0"
+                                        data-animate-class="animate__fadeInUp"
+                                        style="animation-delay: 800ms;">
+                                        {% unless block.settings.btn_text == blank %}
+                                            <a 
+                                                class="btn m-4 {{ block.settings.btn_color }} {{ btn_shadow_sp }} {{ block.settings.btn_size }}"  
+                                                href="{{ block.settings.btn_url }}">
+                                                {{ block.settings.btn_text }}
+                                            </a>
+                                        {% endunless %}
+                                        {% unless block.settings.btn_secondary_text == blank %}
+                                            <a 
+                                                class="btn m-4 {{ block.settings.btn_secondary_color }} {{ btn_shadow_sp }} {{ block.settings.btn_secondary_size }}"  
+                                                href="{{ block.settings.btn_secondary_url }}">
+                                                {{ block.settings.btn_secondary_text }}
+                                            </a>
+                                        {% endunless %}
+                                    </div>
+                                </div>
+                            </div>
+                        {% endunless %}
+                    {% unless block.settings.slide_link == blank %}
+                        </a>
+                    {% endunless %}
+                </div>
+            {% else %}
+                <div class="carousel-item {% if forloop.first == true %}active{% endif %}" data-index="{{ forloop.index0 }}" {{ block.shopify_attributes }}>
+                    {% unless block.settings.slide_link == blank %}
+                        <a href="{{ block.settings.slide_link }}" class="carousel-item-link"> 
+                    {% endunless %}
+                        {% if block.settings.img_mobile == blank and block.settings.img_desktop == blank %}
+                            {% capture current %}{% cycle 1, 2 %}{% endcapture %}
+                            {{ 'hero-apparel-' | append: current | placeholder_svg_tag: 'placeholder-svg bg-secondary' }}
+                        {% else %}
+                            {% comment %}theme-check-disable ImgLazyLoading{% endcomment %}
+                                <img 
+                                    class="carousel-item-img d-lg-none"
+                                    src="{{ block.settings.img_mobile | image_url: width: '960', crop: 'center' }}" 
+                                    alt="{{ block.settings.img_mobile.alt }}"
+                                    width="960"
+                                    height="{{ 960 | divided_by: block.settings.img_mobile.aspect_ratio | round }}"
+                                    loading="{% if section.settings.lazyload %}lazy{% else %}eager{% endif %}"
+                                    fetchpriority="{% if forloop.first %}high{% else %}low{% endif %}"
+                                    style="height: {% if block.settings.img_mobile_height > 0 %}{{ block.settings.img_mobile_height }}px;{% else %}auto;{% endif %}
+                                           opacity: {{ block.settings.img_mobile_opacity }};">
+                                <img 
+                                    class="carousel-item-img d-none d-lg-block"
+                                    src="{{ block.settings.img_desktop | image_url: width: '1920', crop: 'center' }}" 
+                                    alt="{{ block.settings.img_desktop.alt }}"
+                                    width="1920"
+                                    height="{{ 1920 | divided_by: block.settings.img_desktop.aspect_ratio | round }}"
+                                    loading="{% if section.settings.lazyload %}lazy{% else %}eager{% endif %}"
+                                    fetchpriority="{% if forloop.first %}high{% else %}low{% endif %}"
+                                    style="height: {% if block.settings.img_desktop_height > 0 %}{{ block.settings.img_desktop_height }}px;{% else %}auto;{% endif %} 
+                                           opacity: {{ block.settings.img_desktop_opacity }};">
+                            {% comment %}theme-check-enable ImgLazyLoading{% endcomment %}
+                        {% endif %}
+                        {% if block.settings.img_mobile_blur > 0 or block.settings.img_desktop_blur %}
+                            <div class="carousel-item-blur d-lg-none" style="backdrop-filter: blur({{ block.settings.img_mobile_blur }}px); -webkit-backdrop-filter: blur({{ block.settings.img_mobile_blur }}px);">
+                            </div>
+                            <div class="carousel-item-blur d-none d-lg-block" style="backdrop-filter: blur({{ block.settings.img_desktop_blur }}px); -webkit-backdrop-filter: blur({{ block.settings.img_desktop_blur }}px);">
+                            </div>
+                        {% endif %}
+                        {% unless block.settings.title == blank %}
+                            <div class="carousel-caption {{ block.settings.caption_position_mobile }} {{ block.settings.caption_position_desktop }}"
+                                 style="color: {{ block.settings.caption_color }};">
+                                <div class="" style="max-width: {{ block.settings.caption_max_width }}px">
+                                    {% unless block.settings.subtitle_img == blank %}
+                                        <div 
+                                            class="animate__animated animate__faster opacity-0"
+                                              data-animate-class="animate__fadeInDown"
+                                              style="animation-delay: 1200ms;">
+                                                <img
+                                                    class="img-fluid mb-5"
+                                                    src="{{ block.settings.subtitle_img.src | image_url: width: block.settings.brand_image_size }}"
+                                                    alt="{{ block.settings.subtitle_img.alt | escape }}"
+                                                    width="{{ block.settings.brand_image_size }}"
+                                                    height="auto"
+                                                    loading="lazy">
+                                            </div>
+                                    {% endunless %}
+                                    {% unless block.settings.subtitle == blank %}
+                                        <div 
+                                            class="animate__animated animate__faster opacity-0"
+                                            data-animate-class="animate__fadeInDown"
+                                            style="animation-delay: 1000ms;">
+                                            <div class="subtitle mb-3 {{ block.settings.subtitle_size }}">
+                                                {{ block.settings.subtitle }}
+                                            </div>
+                                        </div>
+                                    {% endunless %}
+                                    <div 
+                                        class="animate__animated animate__faster opacity-0"
+                                        data-animate-class="animate__fadeInUp"
+                                        style="animation-delay: 400ms;">
+                                        <{{ block.settings.heading_tag }} class="title mb-3 {{ block.settings.title_size }}">
+                                            {{ block.settings.title }}
+                                        </{{ block.settings.heading_tag }}>
+                                    </div>
+                                    {% unless block.settings.description == blank %}
+                                        <div 
+                                            class="animate__animated animate__faster opacity-0"
+                                            data-animate-class="animate__fadeInUp"
+                                            style="animation-delay: 600ms;">
+                                            <div class="description rte mb-6 {{ block.settings.description_size }}">
+                                                {{ block.settings.description }}
+                                            </div>
+                                        </div>
+                                    {% endunless %}
+                                    <div 
+                                        class="animate__animated animate__faster opacity-0"
+                                        data-animate-class="animate__fadeInUp"
+                                        style="animation-delay: 800ms;">
+                                        {% unless block.settings.btn_text == blank %}
+                                            <a 
+                                                class="btn m-4 {{ block.settings.btn_color }} {{ btn_shadow_sp }} {{ block.settings.btn_size }}"  
+                                                href="{{ block.settings.btn_url }}">
+                                                {{ block.settings.btn_text }}
+                                            </a>
+                                        {% endunless %}
+                                        {% unless block.settings.btn_secondary_text == blank %}
+                                            <a 
+                                                class="btn m-4 {{ block.settings.btn_secondary_color }} {{ btn_shadow_sp }} {{ block.settings.btn_secondary_size }}"  
+                                                href="{{ block.settings.btn_secondary_url }}">
+                                                {{ block.settings.btn_secondary_text }}
+                                            </a>
+                                        {% endunless %}
+                                    </div>
+                                </div>
+                            </div>
+                        {% endunless %}
+                    {% unless block.settings.slide_link == blank %}
+                        </a>
+                    {% endunless %}
+                </div>
+            {% endif %}
+        {% endfor %}
+    </div>
+    {% if section.settings.controls and section.blocks.size > 1 %}
+        <button 
+            class="carousel-control-prev" 
+            type="button" 
+            data-bs-target="#carousel-{{ section.id }}" 
+            data-bs-slide="prev">
+            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">
+                {{ 'general.accessibility.previous' | t }}
+            </span>
+        </button>
+        <button 
+            class="carousel-control-next" 
+            type="button" 
+            data-bs-target="#carousel-{{ section.id }}" 
+            data-bs-slide="next">
+            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">
+                {{ 'general.accessibility.next' | t }}
+            </span>
+        </button>
+    {% endif %}
+
+    <!-- SVG Border Shopiweb -->
+      {% if section.settings.reverse %}
+        {% assign reverse = "transform:rotate(180deg); transition: 0.3s;" %}
+      {% else %}
+        {% assign reverse = "transform:rotate(0deg); transition: 0.3s;" %}
+      {% endif %}
+      {% if section.settings.svg_border_bottom != blank %}
+        <div class="diapo_svg" style="fill: {{ section.settings.color_diapo-svg }}; {{ reverse }};">
+          {{ section.settings.svg_border_bottom }}
+        </div>
+      {% endif %}
+    <!-- END SVG Border Shopiweb -->
+  
+</section>
+
+{% schema %}
+{
+    "name": "Diaporama",
+    "settings": [
+        {
+            "type": "paragraph", 
+            "content": "Documentation FR : [Diaporama by Shopiweb](https:\/\/www.docs.shopiweb.fr\/theme-premium\/documentation\/sections\/diaporama)"
+        },
+        {
+            "type": "header",
+            "content": "Général"
+        },
+        {
+            "type":"header",
+            "content": "⚙️ SVG bordure inférieur",
+            "info": "⚙️ Fonctionnalité 👉 Version Premium"
+        },
+        {
+            "type":"html",
+            "id":"svg_border_bottom",
+            "label":"SVG Code Inférieur",
+            "info": "Librairie : [Getwaves](https://www.getwaves.io)"
+        },
+        {
+            "type":"paragraph",
+            "content":"Librairie : [Shapedivider](https://www.shapedivider.app)"
+        },
+        {
+            "type": "checkbox",
+            "id": "reverse",
+            "label": "Tourner à 180°",
+            "default": false
+        },
+        {
+            "type": "range",
+            "id": "mobheight_diapo-svg",
+            "min": 20,
+            "max": 200,
+            "step": 10,
+            "unit": "px",
+            "default": 50,
+            "label": "Hauteur du SVG mobile"
+        },
+        {
+            "type": "range",
+            "id": "deskheight_diapo-svg",
+            "min": 0,
+            "max": 500,
+            "step": 10,
+            "unit": "px",
+            "default": 100,
+            "label": "Hauteur du SVG bureau"
+        },
+        {
+            "type": "color",
+            "id": "color_diapo-svg",
+            "label": "Couleur du SVG",
+            "default": "#000"
+        },
+        {
+            "type": "checkbox",
+            "id": "controls",
+            "label": "Afficher les contrôles",
+            "info": "Boutons Précédent/Suivant",
+            "default": true
+        },
+        {
+            "type": "select",
+            "id": "controls_style",
+            "label": "Controls style",
+            "options": [
+                { "value": "", "label": "Chevron" },
+                { "value": "carousel-controls-arrows", "label": "Flèche" }
+            ],
+            "default": "carousel-controls-arrows"
+
+        },
+        {
+            "type": "checkbox",
+            "id": "indicators",
+            "label": "Afficher les indicateurs",
+            "default": true
+        },
+        {
+            "type": "select",
+            "id": "indicators_style",
+            "label": "Style des indicateurs",
+            "options": [
+                { "value": "", "label": "Défaut" },
+                { "value": "carousel-indicators-circles", "label": "Points" }
+            ],
+            "default": "carousel-indicators-circles"
+        },
+        {
+            "type": "checkbox",
+            "id": "autoplay",
+            "label": "Activer autoplay",
+            "info": "Rotation automatique des diapositives toutes les 5 secondes",
+            "default": false
+        },
+        {
+            "type": "select",
+            "id": "animation",
+            "label": "Animation",
+            "options": [
+                { "value": "slide", "label": "Slide" },
+                { "value": "slide carousel-fade", "label": "Fade" }
+            ],
+            "default": "slide"
+        },
+        {
+            "type": "checkbox",
+            "id": "ken_burns",
+            "label": "Effet Ken-burns",
+            "default": true
+        },  
+         {
+            "type": "checkbox",
+            "id": "lazyload",
+            "label": "Charger les images",
+            "info": "Il n'est pas recommandé de charger les images en différé si le carrousel est positionné au premier plan",
+            "default": false
+        },
+        {
+            "type": "header",
+            "content": "Marge de la section"
+        },
+        {
+            "type": "range",
+            "id": "mt",
+            "label": "Haut externe",
+            "min": 0,
+            "max": 20,
+            "step": 1,
+            "default": 0
+        },
+        {
+            "type": "range",
+            "id": "mb",
+            "label": "Bas externe",
+            "min": 0,
+            "max": 20,
+            "step": 1,
+            "default": 0
+        }
+    ],
+    "blocks": [
+        {
+            "type": "slide",
+            "name": "Image",
+            "settings": [
+                {
+                    "type": "header",
+                    "content": "Mobile image"
+                },
+                {
+                    "type": "image_picker",
+                    "id": "img_mobile",
+                    "label": "Image mobile",
+                    "info": "(Width recommandée : 900px)"
+                },
+                {
+                    "type": "range",
+                    "id": "img_mobile_height",
+                    "label": "Hauteur image (px)",
+                    "info": "Sélectionnez '0' pour afficher l'image entière",
+                    "min": 0,
+                    "max": 1000,
+                    "step": 10,
+                    "default": 500
+                },
+                {
+                    "type": "range",
+                    "id": "img_mobile_opacity",
+                    "label": "Opacité",
+                    "min": 0,
+                    "max": 1,
+                    "step": 0.1,
+                    "default": 0.7
+                },
+                {
+                    "type": "range",
+                    "id": "img_mobile_blur",
+                    "label": "Flou",
+                    "min": 0,
+                    "max": 10,
+                    "step": 1,
+                    "default": 0
+                },
+                {
+                    "type": "select",
+                    "id": "caption_position_mobile",
+                    "label": "Position du contenu sur mobile",
+                    "options": [
+                        { "value": "carousel-caption-mobile-top", "label": "Haut" },
+                        { "value": "carousel-caption-mobile-center", "label": "Centre" },
+                        { "value": "carousel-caption-mobile-bottom", "label": "Bas" }
+                    ],
+                    "default": "carousel-caption-mobile-center"
+                },
+                {
+                    "type": "header",
+                    "content": "Desktop image"
+                },
+                {
+                    "type": "image_picker",
+                    "id": "img_desktop",
+                    "label": "Image bureau",
+                    "info": "(Width recommandée : 2000px)"
+                },
+                {
+                    "type": "range",
+                    "id": "img_desktop_height",
+                    "label": "Hauteur image (px)",
+                    "info": "Sélectionnez '0' pour afficher l'image entière",
+                    "min": 0,
+                    "max": 1000,
+                    "step": 10,
+                    "default": 800
+                },
+                {
+                    "type": "range",
+                    "id": "img_desktop_opacity",
+                    "label": "Opacité",
+                    "min": 0,
+                    "max": 1,
+                    "step": 0.1,
+                    "default": 0.7
+                },
+                {
+                    "type": "range",
+                    "id": "img_desktop_blur",
+                    "label": "Flou",
+                    "min": 0,
+                    "max": 10,
+                    "step": 1,
+                    "default": 0
+                },
+                {
+                    "type": "select",
+                    "id": "caption_position_desktop",
+                    "label": "Position du contenu sur ordinateur",
+                    "options": [
+                        { "value": "carousel-caption-desktop-left", "label": "Gauche" },
+                        { "value": "carousel-caption-desktop-center", "label": "Centre" },
+                        { "value": "carousel-caption-desktop-right", "label": "Droite" },
+                        { "value": "carousel-caption-desktop-bottom", "label": "Bas" }
+                    ],
+                    "default": "carousel-caption-desktop-center"
+                },
+                {
+                    "type": "header",
+                    "content": "Contenu"
+                },
+                {
+                    "type": "text",
+                    "id": "caption_max_width",
+                    "label": "Contenu largeur max. (px)",
+                    "default": "720"
+                },
+                {
+                    "type": "color",
+                    "id": "caption_color",
+                    "label": "Couleur contenu",
+                    "default": "#ffffff"
+                },
+                {
+                    "type": "image_picker",
+                    "id": "subtitle_img",
+                    "label": "Légende Image"
+                },
+                {
+                    "type": "text",
+                    "id": "brand_image_size",
+                    "label": "Image Largeur/Hauteur (px)",
+                    "default": "60"
+                },
+                {
+                    "type": "text",
+                    "id": "subtitle",
+                    "label": "Légende Texte",
+                    "info": "Laisser vide pour désactiver"
+                },
+                {
+                    "type": "select",
+                    "id": "subtitle_size",
+                    "label": "Taille légende",
+                    "default": "fs-5",
+                    "options": [
+                        { "group": "Légende Standard", "value": "fs-1", "label": "Extra Grand" },
+                        { "group": "Légende Standard", "value": "fs-2", "label": "Super Grand" },
+                        { "group": "Légende Standard", "value": "fs-3", "label": "Très Grand" },
+                        { "group": "Légende Standard", "value": "fs-4", "label": "Grand" },
+                        { "group": "Légende Standard", "value": "fs-5", "label": "Moyen" },
+                        { "group": "Légende Standard", "value": "fs-6", "label": "Petit" } 
+                    ]
+                },
+                {
+                    "type": "inline_richtext",
+                    "id": "title",
+                    "label": "Titre",
+                    "info": "Laisser vide pour désactiver tous le contenu"
+                },
+                {
+                    "type": "select",
+                    "id": "heading_tag",
+                    "label": "Balise titre (SEO)",
+                    "default": "h1",
+                    "options": [
+                        { "value": "h1", "label": "h1" },
+                        { "value": "h2", "label": "h2" },
+                        { "value": "h3", "label": "h3" },
+                        { "value": "h4", "label": "h4" },
+                        { "value": "h5", "label": "h5" },
+                        { "value": "h6", "label": "h6" },
+                        { "value": "span", "label": "Aucune" }
+                    ]
+                },
+                {
+                    "type": "select",
+                    "id": "title_size",
+                    "label": "Taille du titre",
+                    "default": "h2",
+                    "options": [
+                        { "group": "Titre Supérieur", "value": "display-1", "label": "Extra Extra Grand" },
+                        { "group": "Titre Supérieur", "value": "display-2", "label": "Extra Grand" },
+                        { "group": "Titre Supérieur", "value": "display-3", "label": "Ultra Grand" },
+                        { "group": "Titre Supérieur", "value": "display-4", "label": "Super Grand" },
+                        { "group": "Titre Standard", "value": "h1", "label": "Très Grand" },
+                        { "group": "Titre Standard", "value": "h2", "label": "Grand" },
+                        { "group": "Titre Standard", "value": "h3", "label": "Moyen" },
+                        { "group": "Titre Standard", "value": "h4", "label": "Petit" },
+                        { "group": "Titre Standard", "value": "h5", "label": "Très Petit" },
+                        { "group": "Titre Standard", "value": "h6", "label": "Super Petit" }
+                    ]
+                },
+                {
+                    "type": "richtext",
+                    "id": "description",
+                    "label": "Description",
+                    "info": "Laisser vide pour désactiver"
+                },
+                {
+                    "type": "select",
+                    "id": "description_size",
+                    "label": "Description size",
+                    "default": "fs-5",
+                    "options": [
+                        { "group": "Description Standard", "value": "fs-1", "label": "Extra Grand" },
+                        { "group": "Description Standard", "value": "fs-2", "label": "Super Grand" },
+                        { "group": "Description Standard", "value": "fs-3", "label": "Très Grand" },
+                        { "group": "Description Standard", "value": "fs-4", "label": "Grand" },
+                        { "group": "Description Standard", "value": "fs-5", "label": "Moyen" },
+                        { "group": "Description Standard", "value": "fs-6", "label": "Petit" } 
+                    ]
+                },
+                {
+                    "type": "header",
+                    "content": "Premier bouton"
+                },
+                {
+                    "type": "text",
+                    "id": "btn_text",
+                    "label": "Texte du bouton",
+                    "info": "Laisser vide pour désactiver"
+                },
+                {
+                    "type": "url",
+                    "id": "btn_url",
+                    "label": "Lien du bouton"
+                },
+                {
+                    "type": "select",
+                    "id": "btn_color",
+                    "label": "Couleur du bouton",
+                    "default": "btn-primary",
+                    "options": [
+                        { "group": "Normal", "value": "btn-link", "label": "Lien" },
+                        { "group": "Normal", "value": "btn-light", "label": "Claire" },
+                        { "group": "Normal", "value": "btn-dark", "label": "Sombre" },
+                        { "group": "Normal", "value": "btn-primary", "label": "Primaire" },
+                        { "group": "Normal", "value": "btn-secondary", "label": "Secondaire" },
+                        { "group": "Normal", "value": "btn-tertiary", "label": "Tertiaire" },
+                        { "group": "Normal", "value": "btn-success", "label": "Succès" },
+                        { "group": "Normal", "value": "btn-danger", "label": "Danger" },
+                        { "group": "Normal", "value": "btn-warning", "label": "Avertissement" },
+                        { "group": "Normal", "value": "btn-info", "label": "Info" },
+                        { "group": "Contour", "value": "btn-outline-light", "label": "Contour Claire" },
+                        { "group": "Contour", "value": "btn-outline-dark", "label": "Contour Sombre" },
+                        { "group": "Contour", "value": "btn-outline-primary", "label": "Contour Primaire" },
+                        { "group": "Contour", "value": "btn-outline-secondary", "label": "Contour Secondaire" },
+                        { "group": "Contour", "value": "btn-outline-tertiary", "label": "Contour Tertiaire" },
+                        { "group": "Contour", "value": "btn-outline-success", "label": "Contour Succès" },
+                        { "group": "Contour", "value": "btn-outline-danger", "label": "Contour Danger" },
+                        { "group": "Contour", "value": "btn-outline-warning", "label": "Contour Avertissement" },
+                        { "group": "Contour", "value": "btn-outline-info", "label": "Contour Info" }
+                    ]
+                },
+                {
+                    "type": "select",
+                    "id": "btn_size",
+                    "label": "Taille du bouton",
+                    "default": "btn-md",
+                    "options": [
+                        { "value": "btn-sm", "label": "Petit" },
+                        { "value": "btn-md", "label": "Normal" },
+                        { "value": "btn-lg", "label": "Large" }
+                    ]
+                },
+                {
+                    "type": "header",
+                    "content": "Second bouton"
+                },
+                {
+                    "type": "text",
+                    "id": "btn_secondary_text",
+                    "label": "Texte du bouton",
+                    "info": "Laisser vide pour désactiver"
+                },
+                {
+                    "type": "url",
+                    "id": "btn_secondary_url",
+                    "label": "Button URL"
+                },
+                {
+                    "type": "select",
+                    "id": "btn_secondary_color",
+                    "label": "Couleur du bouton",
+                    "default": "btn-primary",
+                    "options": [
+                        { "group": "Normal", "value": "btn-link", "label": "Lien" },
+                        { "group": "Normal", "value": "btn-light", "label": "Claire" },
+                        { "group": "Normal", "value": "btn-dark", "label": "Sombre" },
+                        { "group": "Normal", "value": "btn-primary", "label": "Primaire" },
+                        { "group": "Normal", "value": "btn-secondary", "label": "Secondaire" },
+                        { "group": "Normal", "value": "btn-tertiary", "label": "Tertiaire" },
+                        { "group": "Normal", "value": "btn-success", "label": "Succès" },
+                        { "group": "Normal", "value": "btn-danger", "label": "Danger" },
+                        { "group": "Normal", "value": "btn-warning", "label": "Avertissement" },
+                        { "group": "Normal", "value": "btn-info", "label": "Info" },
+                        { "group": "Contour", "value": "btn-outline-light", "label": "Contour Claire" },
+                        { "group": "Contour", "value": "btn-outline-dark", "label": "Contour Sombre" },
+                        { "group": "Contour", "value": "btn-outline-primary", "label": "Contour Primaire" },
+                        { "group": "Contour", "value": "btn-outline-secondary", "label": "Contour Secondaire" },
+                        { "group": "Contour", "value": "btn-outline-tertiary", "label": "Contour Tertiaire" },
+                        { "group": "Contour", "value": "btn-outline-success", "label": "Contour Succès" },
+                        { "group": "Contour", "value": "btn-outline-danger", "label": "Contour Danger" },
+                        { "group": "Contour", "value": "btn-outline-warning", "label": "Contour Avertissement" },
+                        { "group": "Contour", "value": "btn-outline-info", "label": "Contour Info" }
+                    ]
+                },
+                {
+                    "type": "select",
+                    "id": "btn_secondary_size",
+                    "label": "Taille du bouton",
+                    "default": "btn-md",
+                    "options": [
+                        { "value": "btn-sm", "label": "Petit" },
+                        { "value": "btn-md", "label": "Normal" },
+                        { "value": "btn-lg", "label": "Large" }
+                    ]
+                },
+                {
+                    "type": "header",
+                    "content": "Autres réglages"
+                },
+                {
+                    "type": "url",
+                    "id": "slide_link",
+                    "label": "Lien slide",
+                    "info": "Utilisez cette option si vous préférez lier la diapositive entière et non pas les boutons ci-dessus."
+                }
+            ]
+        },
+        {
+            "type": "video",
+            "name": "Vidéo",
+            "settings": [
+                {
+                    "type": "header",
+                    "content": "Mobile Vidéo"
+                },
+                {
+                    "type": "video",
+                    "id": "video_mobile",
+                    "label": "Vidéo mobile",
+                    "info": "(Width recommandée : 900px)"
+                },
+                {
+                    "type": "range",
+                    "id": "video_mobile_height",
+                    "label": "Hauteur vidéo (px)",
+                    "info": "Sélectionnez '0' pour afficher l'image entière",
+                    "min": 0,
+                    "max": 1000,
+                    "step": 10,
+                    "default": 500
+                },
+                {
+                    "type": "range",
+                    "id": "video_mobile_opacity",
+                    "label": "Opacité",
+                    "min": 0,
+                    "max": 1,
+                    "step": 0.1,
+                    "default": 0.7
+                },
+                {
+                    "type": "range",
+                    "id": "video_mobile_blur",
+                    "label": "Flou",
+                    "min": 0,
+                    "max": 10,
+                    "step": 1,
+                    "default": 0
+                },
+                {
+                    "type": "select",
+                    "id": "caption_position_mobile",
+                    "label": "Position du contenu sur mobile",
+                    "options": [
+                        { "value": "carousel-caption-mobile-top", "label": "Haut" },
+                        { "value": "carousel-caption-mobile-center", "label": "Centre" },
+                        { "value": "carousel-caption-mobile-bottom", "label": "Bas" }
+                    ],
+                    "default": "carousel-caption-mobile-center"
+                },
+                {
+                    "type": "header",
+                    "content": "Desktop vidéo"
+                },
+                {
+                    "type": "video",
+                    "id": "video_desktop",
+                    "label": "Vidéo bureau",
+                    "info": "(Width recommandée : 2000px)"
+                },
+                {
+                    "type": "range",
+                    "id": "video_desktop_height",
+                    "label": "Hauteur vidéo (px)",
+                    "info": "Sélectionnez '0' pour afficher l'image entière",
+                    "min": 0,
+                    "max": 1000,
+                    "step": 10,
+                    "default": 800
+                },
+                {
+                    "type": "range",
+                    "id": "video_desktop_opacity",
+                    "label": "Opacité",
+                    "min": 0,
+                    "max": 1,
+                    "step": 0.1,
+                    "default": 0.7
+                },
+                {
+                    "type": "range",
+                    "id": "video_desktop_blur",
+                    "label": "Flou",
+                    "min": 0,
+                    "max": 10,
+                    "step": 1,
+                    "default": 0
+                },
+                {
+                    "type": "select",
+                    "id": "caption_position_desktop",
+                    "label": "Position du contenu sur ordinateur",
+                    "options": [
+                        { "value": "carousel-caption-desktop-left", "label": "Gauche" },
+                        { "value": "carousel-caption-desktop-center", "label": "Centre" },
+                        { "value": "carousel-caption-desktop-right", "label": "Droite" },
+                        { "value": "carousel-caption-desktop-bottom", "label": "Bas" }
+                    ],
+                    "default": "carousel-caption-desktop-center"
+                },
+                {
+                    "type": "header",
+                    "content": "Contenu"
+                },
+                {
+                    "type": "text",
+                    "id": "caption_max_width",
+                    "label": "Contenu largeur max. (px)",
+                    "default": "720"
+                },
+                {
+                    "type": "color",
+                    "id": "caption_color",
+                    "label": "Couleur contenu",
+                    "default": "#ffffff"
+                },
+                {
+                    "type": "image_picker",
+                    "id": "subtitle_img",
+                    "label": "Légende Image"
+                },
+                {
+                    "type": "text",
+                    "id": "brand_image_size",
+                    "label": "Image Largeur/Hauteur (px)",
+                    "default": "60"
+                },
+                {
+                    "type": "text",
+                    "id": "subtitle",
+                    "label": "Légende Texte",
+                    "info": "Laisser vide pour désactiver"
+                },
+                {
+                    "type": "select",
+                    "id": "subtitle_size",
+                    "label": "Taille légende",
+                    "default": "fs-5",
+                    "options": [
+                        { "group": "Légende Standard", "value": "fs-1", "label": "Extra Grand" },
+                        { "group": "Légende Standard", "value": "fs-2", "label": "Super Grand" },
+                        { "group": "Légende Standard", "value": "fs-3", "label": "Très Grand" },
+                        { "group": "Légende Standard", "value": "fs-4", "label": "Grand" },
+                        { "group": "Légende Standard", "value": "fs-5", "label": "Moyen" },
+                        { "group": "Légende Standard", "value": "fs-6", "label": "Petit" } 
+                    ]
+                },
+                {
+                    "type": "inline_richtext",
+                    "id": "title",
+                    "label": "Titre",
+                    "info": "Laisser vide pour désactiver tous le contenu"
+                },
+                {
+                    "type": "select",
+                    "id": "heading_tag",
+                    "label": "Balise titre (SEO)",
+                    "default": "h1",
+                    "options": [
+                        { "value": "h1", "label": "h1" },
+                        { "value": "h2", "label": "h2" },
+                        { "value": "h3", "label": "h3" },
+                        { "value": "h4", "label": "h4" },
+                        { "value": "h5", "label": "h5" },
+                        { "value": "h6", "label": "h6" },
+                        { "value": "span", "label": "Aucune" }
+                    ]
+                },
+                {
+                    "type": "select",
+                    "id": "title_size",
+                    "label": "Taille du titre",
+                    "default": "h2",
+                    "options": [
+                        { "group": "Titre Supérieur", "value": "display-1", "label": "Extra Extra Grand" },
+                        { "group": "Titre Supérieur", "value": "display-2", "label": "Extra Grand" },
+                        { "group": "Titre Supérieur", "value": "display-3", "label": "Ultra Grand" },
+                        { "group": "Titre Supérieur", "value": "display-4", "label": "Super Grand" },
+                        { "group": "Titre Standard", "value": "h1", "label": "Très Grand" },
+                        { "group": "Titre Standard", "value": "h2", "label": "Grand" },
+                        { "group": "Titre Standard", "value": "h3", "label": "Moyen" },
+                        { "group": "Titre Standard", "value": "h4", "label": "Petit" },
+                        { "group": "Titre Standard", "value": "h5", "label": "Très Petit" },
+                        { "group": "Titre Standard", "value": "h6", "label": "Super Petit" }
+                    ]
+                },
+                {
+                    "type": "richtext",
+                    "id": "description",
+                    "label": "Description",
+                    "info": "Laisser vide pour désactiver"
+                },
+                {
+                    "type": "select",
+                    "id": "description_size",
+                    "label": "Taille de description",
+                    "default": "fs-5",
+                    "options": [
+                        { "group": "Description Standard", "value": "fs-1", "label": "Extra Grand" },
+                        { "group": "Description Standard", "value": "fs-2", "label": "Super Grand" },
+                        { "group": "Description Standard", "value": "fs-3", "label": "Très Grand" },
+                        { "group": "Description Standard", "value": "fs-4", "label": "Grand" },
+                        { "group": "Description Standard", "value": "fs-5", "label": "Moyen" },
+                        { "group": "Description Standard", "value": "fs-6", "label": "Petit" } 
+                    ]
+                },
+                {
+                    "type": "header",
+                    "content": "Premier bouton"
+                },
+                {
+                    "type": "text",
+                    "id": "btn_text",
+                    "label": "Texte du bouton",
+                    "info": "Laisser vide pour désactiver"
+                },
+                {
+                    "type": "url",
+                    "id": "btn_url",
+                    "label": "Lien du bouton"
+                },
+                {
+                    "type": "select",
+                    "id": "btn_color",
+                    "label": "Couleur du bouton",
+                    "default": "btn-primary",
+                    "options": [
+                        { "group": "Normal", "value": "btn-link", "label": "Lien" },
+                        { "group": "Normal", "value": "btn-light", "label": "Claire" },
+                        { "group": "Normal", "value": "btn-dark", "label": "Sombre" },
+                        { "group": "Normal", "value": "btn-primary", "label": "Primaire" },
+                        { "group": "Normal", "value": "btn-secondary", "label": "Secondaire" },
+                        { "group": "Normal", "value": "btn-tertiary", "label": "Tertiaire" },
+                        { "group": "Normal", "value": "btn-success", "label": "Succès" },
+                        { "group": "Normal", "value": "btn-danger", "label": "Danger" },
+                        { "group": "Normal", "value": "btn-warning", "label": "Avertissement" },
+                        { "group": "Normal", "value": "btn-info", "label": "Info" },
+                        { "group": "Contour", "value": "btn-outline-light", "label": "Contour Claire" },
+                        { "group": "Contour", "value": "btn-outline-dark", "label": "Contour Sombre" },
+                        { "group": "Contour", "value": "btn-outline-primary", "label": "Contour Primaire" },
+                        { "group": "Contour", "value": "btn-outline-secondary", "label": "Contour Secondaire" },
+                        { "group": "Contour", "value": "btn-outline-tertiary", "label": "Contour Tertiaire" },
+                        { "group": "Contour", "value": "btn-outline-success", "label": "Contour Succès" },
+                        { "group": "Contour", "value": "btn-outline-danger", "label": "Contour Danger" },
+                        { "group": "Contour", "value": "btn-outline-warning", "label": "Contour Avertissement" },
+                        { "group": "Contour", "value": "btn-outline-info", "label": "Contour Info" }
+                    ]
+                },
+                {
+                    "type": "select",
+                    "id": "btn_size",
+                    "label": "Taille du bouton",
+                    "default": "btn-md",
+                    "options": [
+                        { "value": "btn-sm", "label": "Petit" },
+                        { "value": "btn-md", "label": "Normal" },
+                        { "value": "btn-lg", "label": "Large" }
+                    ]
+                },
+                {
+                    "type": "header",
+                    "content": "Second bouton"
+                },
+                {
+                    "type": "text",
+                    "id": "btn_secondary_text",
+                    "label": "Texte du bouton",
+                    "info": "Laisser vide pour désactiver"
+                },
+                {
+                    "type": "url",
+                    "id": "btn_secondary_url",
+                    "label": "Button URL"
+                },
+                {
+                    "type": "select",
+                    "id": "btn_secondary_color",
+                    "label": "Couleur du bouton",
+                    "default": "btn-primary",
+                    "options": [
+                        { "group": "Normal", "value": "btn-link", "label": "Lien" },
+                        { "group": "Normal", "value": "btn-light", "label": "Claire" },
+                        { "group": "Normal", "value": "btn-dark", "label": "Sombre" },
+                        { "group": "Normal", "value": "btn-primary", "label": "Primaire" },
+                        { "group": "Normal", "value": "btn-secondary", "label": "Secondaire" },
+                        { "group": "Normal", "value": "btn-tertiary", "label": "Tertiaire" },
+                        { "group": "Normal", "value": "btn-success", "label": "Succès" },
+                        { "group": "Normal", "value": "btn-danger", "label": "Danger" },
+                        { "group": "Normal", "value": "btn-warning", "label": "Avertissement" },
+                        { "group": "Normal", "value": "btn-info", "label": "Info" },
+                        { "group": "Contour", "value": "btn-outline-light", "label": "Contour Claire" },
+                        { "group": "Contour", "value": "btn-outline-dark", "label": "Contour Sombre" },
+                        { "group": "Contour", "value": "btn-outline-primary", "label": "Contour Primaire" },
+                        { "group": "Contour", "value": "btn-outline-secondary", "label": "Contour Secondaire" },
+                        { "group": "Contour", "value": "btn-outline-tertiary", "label": "Contour Tertiaire" },
+                        { "group": "Contour", "value": "btn-outline-success", "label": "Contour Succès" },
+                        { "group": "Contour", "value": "btn-outline-danger", "label": "Contour Danger" },
+                        { "group": "Contour", "value": "btn-outline-warning", "label": "Contour Avertissement" },
+                        { "group": "Contour", "value": "btn-outline-info", "label": "Contour Info" }
+                    ]
+                },
+                {
+                    "type": "select",
+                    "id": "btn_secondary_size",
+                    "label": "Taille du bouton",
+                    "default": "btn-md",
+                    "options": [
+                        { "value": "btn-sm", "label": "Petit" },
+                        { "value": "btn-md", "label": "Normal" },
+                        { "value": "btn-lg", "label": "Large" }
+                    ]
+                },
+                {
+                    "type": "header",
+                    "content": "Autres réglages"
+                },
+                {
+                    "type": "url",
+                    "id": "slide_link",
+                    "label": "Lien du slide",
+                    "info": "Utilisez cette option si vous préférez lier la diapositive entière et non pas les boutons ci-dessus."
+                }
+            ]
+        }
+    ],
+    "presets": [
+        {
+            "name": "Diaporama",
+            "category": "Présentation",
+            "blocks": [
+                {
+                    "type": "slide",
+                    "settings": {
+                        "title": "Légende de la 1ère diapositive"
+                    }
+                },
+                {
+                    "type": "slide",
+                    "settings": {
+                        "title": "Légende de la 2ème diapositive"
+                    }
+                }
+            ]
+        }
+    ]
+}
+{% endschema %}

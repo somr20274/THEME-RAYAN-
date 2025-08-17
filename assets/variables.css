@@ -1,0 +1,249 @@
+/* ========================================================================
+   INFORMATIONS GÉNÉRALES SUR LE SITE
+   Propriété de © 2019/2024 Shopiweb.fr
+   Pour plus d'informations, visitez : https://www.shopiweb.fr
+   ======================================================================== */
+
+/* =====================
+   Polices de caractères
+   ===================== */
+
+
+    @font-face {
+  font-family: Poppins;
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+  src: url("//1qqjuk-eg.myshopify.com/cdn/fonts/poppins/poppins_n7.56758dcf284489feb014a026f3727f2f20a54626.woff2?h1=MXFxanVrLWVnLmFjY291bnQubXlzaG9waWZ5LmNvbQ&hmac=fb4c75d31bce4d58b72553d5a413838418f0ede44d5d0e01fd9f05809237c30d") format("woff2"),
+       url("//1qqjuk-eg.myshopify.com/cdn/fonts/poppins/poppins_n7.f34f55d9b3d3205d2cd6f64955ff4b36f0cfd8da.woff?h1=MXFxanVrLWVnLmFjY291bnQubXlzaG9waWZ5LmNvbQ&hmac=eaedaa13ef0dc4d51861e01cc6d1f32f073b24f7ee102e86ce4ec0bf25a9da86") format("woff");
+}
+
+
+
+
+    @font-face {
+  font-family: Poppins;
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+  src: url("//1qqjuk-eg.myshopify.com/cdn/fonts/poppins/poppins_n4.0ba78fa5af9b0e1a374041b3ceaadf0a43b41362.woff2?h1=MXFxanVrLWVnLmFjY291bnQubXlzaG9waWZ5LmNvbQ&hmac=6f06a873e105e79ee3cf8821a2441c4376f5480480f3e7b8f97940eb674938f3") format("woff2"),
+       url("//1qqjuk-eg.myshopify.com/cdn/fonts/poppins/poppins_n4.214741a72ff2596839fc9760ee7a770386cf16ca.woff?h1=MXFxanVrLWVnLmFjY291bnQubXlzaG9waWZ5LmNvbQ&hmac=caad30f1e6091f5844df464438b2a1ce9f785d06a19dc03b054b0b0c17eeedba") format("woff");
+}
+
+    @font-face {
+  font-family: Poppins;
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+  src: url("//1qqjuk-eg.myshopify.com/cdn/fonts/poppins/poppins_n7.56758dcf284489feb014a026f3727f2f20a54626.woff2?h1=MXFxanVrLWVnLmFjY291bnQubXlzaG9waWZ5LmNvbQ&hmac=fb4c75d31bce4d58b72553d5a413838418f0ede44d5d0e01fd9f05809237c30d") format("woff2"),
+       url("//1qqjuk-eg.myshopify.com/cdn/fonts/poppins/poppins_n7.f34f55d9b3d3205d2cd6f64955ff4b36f0cfd8da.woff?h1=MXFxanVrLWVnLmFjY291bnQubXlzaG9waWZ5LmNvbQ&hmac=eaedaa13ef0dc4d51861e01cc6d1f32f073b24f7ee102e86ce4ec0bf25a9da86") format("woff");
+}
+
+    @font-face {
+  font-family: Poppins;
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+  src: url("//1qqjuk-eg.myshopify.com/cdn/fonts/poppins/poppins_i4.846ad1e22474f856bd6b81ba4585a60799a9f5d2.woff2?h1=MXFxanVrLWVnLmFjY291bnQubXlzaG9waWZ5LmNvbQ&hmac=f0c5c5bd995033641769327ef73a01ab0135ac40d3f679ef0bf57b7c530b3108") format("woff2"),
+       url("//1qqjuk-eg.myshopify.com/cdn/fonts/poppins/poppins_i4.56b43284e8b52fc64c1fd271f289a39e8477e9ec.woff?h1=MXFxanVrLWVnLmFjY291bnQubXlzaG9waWZ5LmNvbQ&hmac=21c6357724e6c5adf943e5f1750fa33755589e2f516e701017422598ea25f7b9") format("woff");
+}
+
+
+
+/* =====================
+   Variable CSS
+   ===================== */
+
+:root {
+    --bs-primary: #6a8daa;
+    --bs-primary-rgb: 106, 141, 170;
+    --bs-primary-lighten-5: #7a99b3;
+    --bs-primary-lighten-10: #7a99b3;
+    --bs-primary-darken-5: #5b80a0;
+    --bs-primary-darken-10: #52738f;
+
+    --bs-secondary: #e5d5c8;
+    --bs-secondary-rgb: 229, 213, 200;
+    --bs-secondary-lighten-5: #ede2d9;
+    --bs-secondary-lighten-10: #f5efeb;
+    --bs-secondary-darken-5: #ddc8b7;
+    --bs-secondary-darken-10: #d5bba5;
+
+    --bs-tertiary: #242426;
+    --bs-tertiary-rgb: 36, 36, 38;
+    --bs-tertiary-lighten-5: #303033;
+    --bs-tertiary-lighten-10: #3d3d40;
+    --bs-tertiary-darken-5: #181819;
+    --bs-tertiary-darken-10: #0b0b0c;
+
+    --bs-dark: #000000;
+    --bs-dark-rgb: 0, 0, 0;
+    --bs-dark-lighten-5: #0d0d0d;
+    --bs-dark-lighten-10: #1a1a1a;
+    --bs-dark-darken-5: #000000;
+    --bs-dark-darken-10: #000000;
+
+    --bs-light: #efefef;
+    --bs-light-rgb: 239, 239, 239;
+    --bs-light-lighten-5: #fcfcfc;
+    --bs-light-lighten-10: #ffffff;
+    --bs-light-darken-5: #e2e2e2;
+    --bs-light-darken-10: #d5d5d5;
+
+    --bs-body-bg: #ffffff;
+    --bs-body-bg-rgb: 255, 255, 255;
+    --bs-body-color: #1d1d1f;
+    --bs-body-color-rgb: 29, 29, 31;
+
+    --bs-border-radius: 1rem;
+
+    --bs-link-color: var(--bs-primary);
+    --bs-link-color-rgb: 106, 141, 170;
+    --bs-link-hover-color: var(--bs-primary-darken-10);
+    --bs-link-hover-color-rgb: 82, 115, 143;
+
+    --bs-success: #198754;
+    --bs-success-darken: #115c39;
+    --bs-success-rgb: 25, 135, 84;
+    --bs-danger: #dc3545;
+    --bs-danger-darken: #bd2130;
+    --bs-danger-rgb: 220, 53, 69;
+    --bs-warning: #ffc107;
+    --bs-warning-darken: #a07800;
+    --bs-warning-rgb: 255, 193, 7;
+    --bs-info: #0dcaf0;
+    --bs-info-darken: #08798f;
+    --bs-info-rgb: 13, 202, 240;
+
+    
+        --bs-headings-font-family: Poppins, sans-serif;
+        --bs-headings-font-weight: 700;
+    
+
+    
+        --bs-body-font-family:  Poppins, sans-serif;
+    
+}
+
+
+/* =====================
+   Boutons
+   ===================== */
+
+body .btn {
+    letter-spacing: 0.0rem;
+    text-transform: ;
+    font-weight: 500;
+}
+
+body .btn-md {
+    --bs-btn-padding-x: 1.3rem;
+    --bs-btn-padding-y: 0.4rem;
+}
+
+body .btn-lg {
+    --bs-btn-padding-x: 1.95rem;
+    --bs-btn-padding-y: 0.6rem;
+}
+
+
+    .btn {
+        background-image: var(--bs-gradient);
+    }
+
+
+ 
+    .btn-link {
+        box-shadow: none !important;
+        background-image: none !important;
+    }
+    .btn-shadow-1 {
+        border-radius: var(--bs-border-radius)!important;
+        box-shadow: rgba(0, 0, 0, 0.16) 0px 3px 6px, rgba(0, 0, 0, 0.23) 0px 3px 6px;
+    }
+    .btn-shadow-2 {
+        border-radius: var(--bs-border-radius)!important;
+        box-shadow: rgba(0, 0, 0, 0.19) 0px 10px 20px, rgba(0, 0, 0, 0.23) 0px 6px 6px;
+    }
+    .btn-shadow-3 {
+        border-radius: var(--bs-border-radius)!important;
+        box-shadow: rgba(0, 0, 0, 0.25) 0px 14px 28px, rgba(0, 0, 0, 0.22) 0px 10px 10px;
+    }
+    .btn-shadow-4 {
+        border-radius: var(--bs-border-radius)!important;
+        box-shadow: rgba(0, 0, 0, 0.3) 0px 19px 38px, rgba(0, 0, 0, 0.22) 0px 15px 12px;
+    }
+
+
+
+/* =====================
+   Formulaires
+   ===================== */
+
+.form-control-md,
+.form-select-md {
+    padding-left: 1.3rem;
+    padding-right: 1.3rem;
+    padding-top: 0.4rem;
+    padding-bottom: 0.4rem;
+}
+
+.form-select {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%231d1d1f' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e")
+}
+
+[dir="ltr"] .form-select-md {
+    padding-right: 2.5rem;
+}
+
+[dir="rtl"] .form-select-md {
+    padding-left: 2.5rem;
+}
+
+
+/* =====================
+   Offcanvas / Modal
+   ===================== */
+
+body .offcanvas-backdrop,
+body .modal-backdrop {
+    background-color: rgba(0, 0, 0, 0.5);
+    
+        backdrop-filter: blur(5px);
+    
+}
+
+/* =====================
+   Accordéon
+   ===================== */
+
+.accordion {
+    --bs-accordion-btn-icon: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%231d1d1f'%3e%3cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3e%3c/svg%3e");
+    --bs-accordion-btn-active-icon: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%231d1d1f'%3e%3cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3e%3c/svg%3e");
+}
+
+/* =====================
+   Autres styles
+   ===================== */
+
+#offcanvas-menu-nav .nav-link[aria-expanded]:after {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%231d1d1f' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cline x1='12' y1='5' x2='12' y2='19'%3E%3C/line%3E%3Cline x1='5' y1='12' x2='19' y2='12'%3E%3C/line%3E%3C/svg%3E")
+}
+#offcanvas-menu-nav .nav-link[aria-expanded="true"]::after {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%231d1d1f' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cline x1='5' y1='12' x2='19' y2='12'%3E%3C/line%3E%3C/svg%3E");
+}
+
+.btn-close {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%231d1d1f'%3e%3cpath d='M.293.293a1 1 0 0 1 1.414 0L8 6.586 14.293.293a1 1 0 1 1 1.414 1.414L9.414 8l6.293 6.293a1 1 0 0 1-1.414 1.414L8 9.414l-6.293 6.293a1 1 0 0 1-1.414-1.414L6.586 8 .293 1.707a1 1 0 0 1 0-1.414z'/%3e%3c/svg%3e")
+}
+
+/* =====================
+   Personnalisation des prix
+   ===================== */
+
+.product-item-price-final,
+.product-price-final {
+  color: #198754!important;
+}
+
+

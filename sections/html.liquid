@@ -1,0 +1,490 @@
+{% comment %}
+---------------------------------------------------------
+Copyright © 2019/2024 Theme Shopiweb Premium. Tous droits réservés.
+La copie, la modification, la distribution ou l'utilisation
+non autorisée de ce code ou de toute partie de celui-ci est formellement interdite.
+Les contrevenants seront poursuivis dans toute la mesure permise par la loi.
+---------------------------------------------------------
+{% endcomment %}
+
+{% liquid 
+    assign pt = section.settings.pt | prepend: 'pt-'
+    assign pb = section.settings.pb | prepend: 'pb-'
+    assign mt = section.settings.mt | prepend: 'mt-'
+    assign mb = section.settings.mb | prepend: 'mb-'
+
+    if section.settings.bg_type == 'custom'
+        assign text_color_class = section.settings.bg_color | split: " " | last
+        assign bg_class = 'content-bg-gradient ' | append: text_color_class
+    else
+        assign bg_class = section.settings.bg_color
+    endif
+
+    assign btn_shadow_sp = settings.btn_shadow_sp
+
+    assign visibility = ''
+
+    if section.settings.visibility_xs == false
+        assign visibility = 'd-none'
+    endif
+
+    if section.settings.visibility_md
+        assign visibility = ' d-md-block' | prepend: visibility
+    else 
+        assign visibility = ' d-md-none' | prepend: visibility
+    endif
+
+    if section.settings.visibility_lg
+        assign visibility = ' d-lg-block' | prepend: visibility
+    else 
+        assign visibility = ' d-lg-none' | prepend: visibility
+    endif
+%}
+
+<div 
+    id="html-section-{{ section.id }}" 
+    class="html-section enter-view {{ bg_class }} {{ section.settings.text_align_mobile }} {{ section.settings.text_align_desktop }} {{ pt }} {{ pb }} {{ mt }} {{ mb }} {{ visibility }}"
+
+    {% if section.settings.bg_type == 'custom' %}
+        style="background: {{ section.settings.bg_gradient_color }};"
+    {% endif %}>
+  
+    <div class="{{ section.settings.container }}">
+        {% render 'section-header' %}
+        {{ section.settings.html }}
+        {% unless section.settings.btn_text == blank %}
+          <div class="html-btn d-inline-flex mt-8 mb-7 animate__animated animate__faster opacity-0"
+               {% if settings.effect_apply_btn_enable %} 
+                 data-animate-class="{{ settings.animation_btn_name }}"
+                 style="animation-delay: 800ms;"
+               {% endif %}>
+               <a 
+                 class="btn {{ section.settings.btn_color }} {{ btn_shadow_sp }} {{ section.settings.btn_size }}"  
+                 href="{{ section.settings.btn_url }}">
+                {{ section.settings.btn_text }}
+               </a>
+          </div>
+        {% endunless %}
+    </div>
+</div>
+  
+{% schema %}
+{
+    "name": "🏆 HTML/Liquid",
+    "settings": [
+        {
+            "type": "header",
+            "content": "🏆 Application Liquid/HTML code",
+            "info": "👉 Application Version Shopiweb Premium"
+        },
+        {
+            "type": "paragraph",
+            "content": "Documentation FR : [HTML/Liquid by Shopiweb](https:\/\/www.docs.shopiweb.fr\/theme-premium\/documentation\/sections\/html-liquid)"
+        },
+        {
+            "type": "header",
+            "content": "Général"
+        },
+        {
+            "type": "select",
+            "id": "bg_type",
+            "label": "Type d'arrière-plan",
+            "default": "predefined",
+            "options": [
+                { "value": "predefined", "label": "Couleur" },
+                { "value": "custom", "label": "Fondu" }
+            ]
+        },
+        {
+            "type": "select",
+            "id": "bg_color",
+            "label": "Couleur d'arrière plan",
+            "default": "bg-body text-body",
+            "options": [
+                { "group": "Principal", "value": "bg-primary text-white", "label": "Primaire (Texte blanc)" },
+                { "group": "Principal", "value": "bg-secondary text-white", "label": "Secondaire (Texte blanc)" },
+                { "group": "Principal", "value": "bg-tertiary text-white", "label": "Tertiaire (Texte blanc)" },
+                { "group": "Intermédiaire", "value": "bg-white text-dark", "label": "Blanc (Texte noir)" },
+                { "group": "Intermédiaire", "value": "bg-light text-body", "label": "Claire (Texte noir)" },
+                { "group": "Intermédiaire", "value": "bg-dark text-white", "label": "Sombre (Texte blanc)" },
+                { "group": "Par défaut", "value": "bg-body text-body", "label": "Corps (body) (Texte noir)" }
+            ],
+            "info": "S'applique également au texte si vous sélectionnez un dégradé personnalisé."
+        },
+        {
+            "type": "color_background",
+            "id": "bg_gradient_color",
+            "label": "Dégradé personnalisé",
+            "default": "linear-gradient(180deg, #6c757d 0%, #343a40 100%)",
+            "visible_if": "{{ section.settings.bg_type == 'custom' }}"
+        },
+        {
+            "type": "liquid",
+            "id": "html",
+            "label": "HTML / LIQUID code",
+            "default": "<p class=\"bg-light rounded border p-4\">Date du jour : <b>{{ 'now' | date: \"%d %b %Y\" }}</b></p>",
+            "info": "Note : Vous pouvez utiliser les codes HTML et Liquid."
+        },
+        {
+            "type": "select",
+            "id": "container",
+            "label": "Conteneur",
+            "default": "container",
+            "options": [
+                { "value": "container", "label": "Page" },
+                { "value": "container-fluid", "label": "Large" },
+                { "value": "", "label": "Pleine largeur" }
+            ]
+        },
+        {
+            "type": "select",
+            "id": "text_align_mobile",
+            "label": "Alignement du texte - mobile",
+            "default": "text-center",
+            "options": [
+                { "value": "text-start", "label": "Gauche" },
+                { "value": "text-center", "label": "Centre" },
+                { "value": "text-end", "label": "Droite" }
+            ]
+        },
+        {
+            "type": "select",
+            "id": "text_align_desktop",
+            "label": "Alignement du texte - bureau",
+            "default": "text-lg-center",
+            "options": [
+                { "value": "text-lg-start", "label": "Gauche" },
+                { "value": "text-lg-center", "label": "Centre" },
+                { "value": "text-lg-end", "label": "Droite" }
+            ]
+        },
+        {
+            "type": "header",
+            "content": "En-tête de la section"
+        },
+        {
+            "type": "image_picker",
+            "id": "subtitle_img",
+            "label": "Légende Image"
+        },
+        {
+            "type": "text",
+            "id": "brand_image_size",
+            "label": "Image Largeur/Hauteur (px)",
+            "default": "60"
+        },
+        {
+            "type": "text",
+            "id": "subtitle",
+            "label": "Légende Texte"
+        },
+        {
+            "type": "select",
+            "id": "subtitle_size",
+            "label": "Taille de la légende",
+            "default": "fs-5",
+            "options": [
+                { "group": "Légende Standard", "value": "fs-1", "label": "Extra Grand" },
+                { "group": "Légende Standard", "value": "fs-2", "label": "Super Grand" },
+                { "group": "Légende Standard", "value": "fs-3", "label": "Très Grand" },
+                { "group": "Légende Standard", "value": "fs-4", "label": "Grand" },
+                { "group": "Légende Standard", "value": "fs-5", "label": "Moyen" },
+                { "group": "Légende Standard", "value": "fs-6", "label": "Petit" } 
+            ]
+        },
+        {
+            "type": "color",
+            "id": "color_caption",
+            "label": "Couleur de la légende",
+            "default": "#6c757d"
+        },
+        {
+            "type": "text",
+            "id": "title_overlay",
+            "label": "Titre overlay",
+            "info": "Laisser vide pour désactiver"
+        },
+        {
+            "type": "select",
+            "id": "title_overlay_position",
+            "label": "Position du titre overlay",
+            "default": "center",
+            "options": [
+                { "value": "top", "label": "Haut" },
+                { "value": "center", "label": "Centre" }
+            ]
+        },
+        {
+            "type": "select",
+            "id": "title_overlay_size",
+            "label": "Taille du titre overlay",
+            "default": "3",
+            "options": [
+                { "group": "Titre Overlay", "value": "4", "label": "Grand" },
+                { "group": "Titre Overlay", "value": "3", "label": "Moyen" },
+                { "group": "Titre Overlay", "value": "2", "label": "Petit" }
+            ]
+        },
+        {
+            "type": "color",
+            "id": "color_title_overlay",
+            "label": "Couleur du titre overlay",
+            "default": "#000000"
+        },
+        {
+            "type": "range",
+            "id": "title_overlay_opacity",
+            "label": "Opacité du titre overlay",
+            "default": 0.1,
+            "min": 0,
+            "max": 1,
+            "step": 0.1
+        },
+        {
+            "type": "checkbox",
+            "id": "apply_text_stroke",
+            "label": "Appliquer un effet contour de texte (stroke)",
+            "default": false
+        },
+        {
+            "type": "inline_richtext",
+            "id": "title",
+            "label": "Titre",
+            "default": "HTML / LIQUID code"
+        },
+        {
+            "type": "paragraph",
+            "content": "Pour ajouter une surbrillance animée à un texte, mettez-le en italique en cliquant sur le bouton 'I' dans l'éditeur."
+        },
+        {
+            "type": "select",
+            "id": "italic_color_option",
+            "label": "Appliquer un style au texte en italique",
+            "options": [
+                { "value": "none", "label": "Aucun" },
+                { "value": "apply_color", "label": "Appliquer une couleur" },
+                { "value": "stencil", "label": "Appliquer le style pochoir" },
+                { "value": "background_cover", "label": "Appliquer le style surbrillance" },
+                { "value": "gradient_color", "label": "Appliquer une couleur dégradé" }
+            ],
+            "default": "none",
+            "info": "Choisissez comment styliser le texte en italique : sans style supplémentaire, avec une couleur, avec un effet de pochoir ou un style de surbrillance."
+        },
+        {
+            "type": "select",
+            "id": "highlighted_text_style",
+            "label": "Appliquer un style de soulignement au texte en italique",
+            "options": [
+                { "value": "none", "label": "Aucun" },
+                { "value": "basic_underline", "label": "Soulignement Basique" },
+                { "value": "squiggle_underline", "label": "Soulignement Ondulé" },
+                { "value": "squiggle_underline_2", "label": "Soulignement Signature" },
+                { "value": "circle_underline", "label": "Soulignement Cercle" },
+                { "value": "sketch_underline", "label": "Soulignement Esquisse" },
+                { "value": "heartbeat_underline", "label": "Soulignement Rythme" },
+                { "value": "zigzag_underline", "label": "Soulignement Zigzag" },
+                { "value": "wave_underline", "label": "Soulignement Vague" },
+                { "value": "double_zigzag_underline", "label": "Soulignement Double Zigzag" }
+            ],
+            "default": "none",
+            "info": "Choisissez un style de soulignement SVG pour le texte en surbrillance italique. Sélectionnez 'Aucun' pour ne pas appliquer de soulignement."
+        },
+        {
+            "type": "color",
+            "id": "highlight_color",
+            "label": "Couleur de surbrillance",
+            "default": "#25D366",
+            "info": "Couleur appliquée au texte en italique et au SVG de soulignement, si activés."
+        },
+        {
+            "type": "color_background",
+            "id": "title_gradient_color",
+            "label": "Dégradé de surbrillance",
+            "default": "linear-gradient(90deg, #c99700 0%, #1d1d1f 100%)",
+            "info": "Couleur dégradé appliquée au texte en italique, si activés et uniquement pour le style 'Appliquer une couleur dégradé'."
+        },
+        {
+            "type": "select",
+            "id": "heading_tag",
+            "label": "Balise titre (SEO)",
+            "default": "h2",
+            "options": [
+                { "value": "h1", "label": "h1" },
+                { "value": "h2", "label": "h2" },
+                { "value": "h3", "label": "h3" },
+                { "value": "h4", "label": "h4" },
+                { "value": "h5", "label": "h5" },
+                { "value": "h6", "label": "h6" },
+                { "value": "span", "label": "Aucune" }
+            ]
+        },
+        {
+            "type": "select",
+            "id": "title_size",
+            "label": "Taille du titre",
+            "default": "h2",
+            "options": [
+                { "group": "Titre Supérieur", "value": "display-1", "label": "Extra Extra Grand" },
+                { "group": "Titre Supérieur", "value": "display-2", "label": "Extra Grand" },
+                { "group": "Titre Supérieur", "value": "display-3", "label": "Ultra Grand" },
+                { "group": "Titre Supérieur", "value": "display-4", "label": "Super Grand" },
+                { "group": "Titre Standard", "value": "h1", "label": "Très Grand" },
+                { "group": "Titre Standard", "value": "h2", "label": "Grand" },
+                { "group": "Titre Standard", "value": "h3", "label": "Moyen" },
+                { "group": "Titre Standard", "value": "h4", "label": "Petit" },
+                { "group": "Titre Standard", "value": "h5", "label": "Très Petit" },
+                { "group": "Titre Standard", "value": "h6", "label": "Super Petit" }
+            ]
+        },
+        {
+            "type": "checkbox",
+            "id": "show_svg_h2",
+            "label": "Afficher le SVG sous-titre",
+            "default": true,
+            "info": "Activez cette option pour afficher le SVG sous le titre, tel que défini dans les paramètres du thème."
+        },
+        {
+            "type": "richtext",
+            "id": "description",
+            "label": "Description",
+            "default": "<p>Rédigez un texte accrocheur pour cette section</p>"
+        },
+        {
+            "type": "select",
+            "id": "description_size",
+            "label": "Taille de description",
+            "default": "fs-5",
+            "options": [
+                { "group": "Description Standard", "value": "fs-1", "label": "Extra Grand" },
+                { "group": "Description Standard", "value": "fs-2", "label": "Super Grand" },
+                { "group": "Description Standard", "value": "fs-3", "label": "Très Grand" },
+                { "group": "Description Standard", "value": "fs-4", "label": "Grand" },
+                { "group": "Description Standard", "value": "fs-5", "label": "Moyen" },
+                { "group": "Description Standard", "value": "fs-6", "label": "Petit" } 
+            ]
+        },
+        {
+            "type": "header",
+            "content": "Bouton"
+        },
+        {
+            "type": "text",
+            "id": "btn_text",
+            "label": "Texte du bouton",
+            "info": "Laisser vide pour désactiver"
+        },
+        {
+            "type": "url",
+            "id": "btn_url",
+            "label": "URL du bouton"
+        },
+        {
+            "type": "select",
+            "id": "btn_color",
+            "label": "Couleur du bouton",
+            "default": "btn-primary",
+            "options": [
+                { "group": "Normal", "value": "btn-link", "label": "Lien" },
+                { "group": "Normal", "value": "btn-light", "label": "Claire" },
+                { "group": "Normal", "value": "btn-dark", "label": "Sombre" },
+                { "group": "Normal", "value": "btn-primary", "label": "Primaire" },
+                { "group": "Normal", "value": "btn-secondary", "label": "Secondaire" },
+                { "group": "Normal", "value": "btn-tertiary", "label": "Tertiaire" },
+                { "group": "Normal", "value": "btn-success", "label": "Succès" },
+                { "group": "Normal", "value": "btn-danger", "label": "Danger" },
+                { "group": "Normal", "value": "btn-warning", "label": "Avertissement" },
+                { "group": "Normal", "value": "btn-info", "label": "Info" },
+                { "group": "Contour", "value": "btn-outline-light", "label": "Contour Claire" },
+                { "group": "Contour", "value": "btn-outline-dark", "label": "Contour Sombre" },
+                { "group": "Contour", "value": "btn-outline-primary", "label": "Contour Primaire" },
+                { "group": "Contour", "value": "btn-outline-secondary", "label": "Contour Secondaire" },
+                { "group": "Contour", "value": "btn-outline-tertiary", "label": "Contour Tertiaire" },
+                { "group": "Contour", "value": "btn-outline-success", "label": "Contour Succès" },
+                { "group": "Contour", "value": "btn-outline-danger", "label": "Contour Danger" },
+                { "group": "Contour", "value": "btn-outline-warning", "label": "Contour Avertissement" },
+                { "group": "Contour", "value": "btn-outline-info", "label": "Contour Info" }
+            ]
+        },
+        {
+            "type": "select",
+            "id": "btn_size",
+            "label": "Taille du bouton",
+            "default": "btn-md",
+            "options": [
+                { "value": "btn-sm", "label": "Petit" },
+                { "value": "btn-md", "label": "Normal" },
+                { "value": "btn-lg", "label": "Large" }
+            ]
+        },
+        {
+            "type": "header",
+            "content": "Espacement de la section"
+        },
+        {
+            "type": "range",
+            "id": "pt",
+            "label": "Haut interne",
+            "min": 0,
+            "max": 20,
+            "step": 1,
+            "default": 0
+        },
+        {
+            "type": "range",
+            "id": "pb",
+            "label": "Bas interne",
+            "min": 0,
+            "max": 20,
+            "step": 1,
+            "default": 0
+        },
+        {
+            "type": "range",
+            "id": "mt",
+            "label": "Haut externe",
+            "min": 0,
+            "max": 20,
+            "step": 1,
+            "default": 0
+        },
+        {
+            "type": "range",
+            "id": "mb",
+            "label": "Bas externe",
+            "min": 0,
+            "max": 20,
+            "step": 1,
+            "default": 0
+        },
+        {
+            "type": "header",
+            "content": "Visibilité",
+            "info": "Afficher/masquer cette section en fonction de la résolution de l'écran"
+        },
+        {
+            "type": "checkbox",
+            "id": "visibility_xs",
+            "label": "Afficher sur mobile",
+            "default": true
+        },
+        {
+            "type": "checkbox",
+            "id": "visibility_md",
+            "label": "Afficher sur tablette",
+            "default": true
+        },
+        {
+            "type": "checkbox",
+            "id": "visibility_lg",
+            "label": "Afficher sur bureau",
+            "default": true
+        }
+    ],
+    "presets": [
+        {
+            "name": "🏆 HTML/Liquid",
+            "category": "Contenus"
+        }
+    ]
+}
+{% endschema %}

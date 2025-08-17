@@ -1,0 +1,395 @@
+{% comment %}
+---------------------------------------------------------
+Copyright © 2019/2024 Theme Shopiweb Premium. Tous droits réservés.
+La copie, la modification, la distribution ou l'utilisation
+non autorisée de ce code ou de toute partie de celui-ci est formellement interdite.
+Les contrevenants seront poursuivis dans toute la mesure permise par la loi.
+---------------------------------------------------------
+{% endcomment %}
+
+{% liquid
+    assign pt = section.settings.pt | prepend: 'pt-'
+    assign pb = section.settings.pb | prepend: 'pb-'
+    assign mt = section.settings.mt | prepend: 'mt-'
+    assign mb = section.settings.mb | prepend: 'mb-'
+
+    if section.settings.bg_type == 'custom'
+        assign text_color_class = section.settings.bg_color | split: " " | last
+        assign bg_class = 'content-bg-gradient ' | append: text_color_class
+    elsif section.settings.bg_type == 'image'
+        assign bg_class = section.settings.bg_color | split: " " | last
+    else
+        assign bg_class = section.settings.bg_color
+    endif
+
+    assign visibility = ''
+
+    if section.settings.visibility_xs == false
+        assign visibility = 'd-none'
+    endif
+
+    if section.settings.visibility_md
+        assign visibility = ' d-md-block' | prepend: visibility
+    else 
+        assign visibility = ' d-md-none' | prepend: visibility
+    endif
+
+    if section.settings.visibility_lg
+        assign visibility = ' d-lg-block' | prepend: visibility
+    else 
+        assign visibility = ' d-lg-none' | prepend: visibility
+    endif
+%}
+
+{% style %}
+#dynamic-{{ section.id }} .text-3d {
+  text-shadow:
+    0 1px 0 #CCC,
+    0 2px 0 #CCC,
+    0 3px 0 #CCC,
+    0 4px 0 #CCC,
+    0 5px 0 #CCC,
+    0 6px 0 transparent,
+    0 7px 0 transparent,
+    0 8px 10px rgba(0, 0, 0, 0.4);
+}
+
+#dynamic-{{ section.id }} .text-flaming {
+  text-shadow: 0 -1px 4px #FFF, 0 -2px 10px #ff0, 0 -10px 20px #ff8000, 0 -18px 40px #F00;
+  margin-top: 0.75rem!important;
+}
+
+#dynamic-{{ section.id }} .text-distant {
+  text-shadow: 1px 3px 0 #969696, 1px 13px 5px #aba8a8;
+}
+{% endstyle %}
+
+<section 
+    id="dynamic-{{ section.id }}" 
+    class="dynamic {{ bg_class }} {{ pt }} {{ pb }} {{ mt }} {{ mb }} {{ visibility }}"
+
+    {% if section.settings.bg_type == 'image' %}
+        style="background-image: url('{{ section.settings.background_img.src | image_url }}'); 
+               background-size: cover; 
+               background-repeat: no-repeat; 
+               background-position: center center;
+               position: relative;"
+    {% elsif section.settings.bg_type == 'custom' %}
+        style="background: {{ section.settings.bg_gradient_color }};"
+    {% endif %}>
+
+    {% if section.settings.bg_type == 'image' %}
+        <div class="background-overlay" 
+             style="background: rgba(0, 0, 0, {{ section.settings.background_img_opacity }});">
+        </div>
+        <div class="background-overlay-blur" 
+             style="backdrop-filter: blur({{ section.settings.background_img_blur }}px);
+                    -webkit-backdrop-filter: blur({{ section.settings.background_img_blur }}px);">
+        </div>
+    {% endif %}
+  
+    <div class="text-center position-relative">
+          <{{ section.settings.heading_tag }} class="{{ section.settings.text_style }} {{ section.settings.title_size }}">
+            {% if section.settings.title_strong %}
+              <strong>{{ section.settings.title }}</strong>
+            {% else %}
+              {{ section.settings.title }}
+            {% endif %}
+            <span 
+              style="color:{{section.settings.color_typewriter_text}};" 
+              class="typewrite title {{ section.settings.title_size }}" 
+              data-period="2000" 
+              data-type='[ {{section.settings.typewriter_text}} ]'
+              data-cursor-color="{{ section.settings.typewriter_cursor_color }}"
+            >
+              <span class="wrap"></span>
+            </span>
+          </{{ section.settings.heading_tag }}>
+    </div>
+</section>
+
+{% schema %}
+  {
+    "name": "Texte dynamique",
+    "settings": [
+        {
+            "type": "paragraph", 
+            "content": "Documentation FR : [Texte dynamique by Shopiweb](https:\/\/www.docs.shopiweb.fr\/theme-premium\/documentation\/sections\/texte-dynamique)"
+        },
+        {
+            "type": "header",
+            "content": "Général"
+        },
+        {
+            "type": "select",
+            "id": "bg_type",
+            "label": "Type d'arrière-plan",
+            "default": "predefined",
+            "options": [
+                { "value": "predefined", "label": "Couleur" },
+                { "value": "custom", "label": "Fondu" },
+                { "value": "image", "label": "Image" }
+            ]
+        },
+        {
+            "type": "select",
+            "id": "bg_color",
+            "label": "Couleur d'arrière plan",
+            "default": "bg-body text-body",
+            "options": [
+                { "group": "Principal", "value": "bg-primary text-white", "label": "Primaire (Texte blanc)" },
+                { "group": "Principal", "value": "bg-secondary text-white", "label": "Secondaire (Texte blanc)" },
+                { "group": "Principal", "value": "bg-tertiary text-white", "label": "Tertiaire (Texte blanc)" },
+                { "group": "Intermédiaire", "value": "bg-white text-dark", "label": "Blanc (Texte noir)" },
+                { "group": "Intermédiaire", "value": "bg-light text-body", "label": "Claire (Texte noir)" },
+                { "group": "Intermédiaire", "value": "bg-dark text-white", "label": "Sombre (Texte blanc)" },
+                { "group": "Par défaut", "value": "bg-body text-body", "label": "Corps (body) (Texte noir)" }
+            ],
+            "info": "S'applique également au texte si vous sélectionnez un dégradé personnalisé."
+        },
+        {
+            "type": "color_background",
+            "id": "bg_gradient_color",
+            "label": "Dégradé personnalisé",
+            "default": "linear-gradient(180deg, #6c757d 0%, #343a40 100%)",
+            "visible_if": "{{ section.settings.bg_type == 'custom' }}"
+        },
+        {
+            "type": "image_picker",
+            "id": "background_img",
+            "label": "Image d'arrière-plan",
+            "visible_if": "{{ section.settings.bg_type == 'image' }}"
+        },
+        {
+            "type": "range",
+            "id": "background_img_opacity",
+            "label": "Opacité",
+            "min": 0,
+            "max": 1,
+            "step": 0.1,
+            "default": 0.3,
+            "visible_if": "{{ section.settings.bg_type == 'image' }}"
+        },
+        {
+            "type": "range",
+            "id": "background_img_blur",
+            "label": "Flou",
+            "min": 0,
+            "max": 10,
+            "step": 1,
+            "default": 0,
+            "visible_if": "{{ section.settings.bg_type == 'image' }}"
+        },
+        {
+            "type": "text",
+            "id": "title",
+            "label": "Titre",
+            "default": "Avec Shopiweb PREMIUM vous pouvez :"
+        },
+        {
+            "type": "checkbox",
+            "id": "title_strong",
+            "label": "Titre en gras (strong)",
+            "default": true
+        },
+        {
+            "type": "select",
+            "id": "text_style",
+            "label": "Style du titre",
+            "default": "",
+            "options": [
+                { "value": "", "label": "Normal" },
+                { "value": "text-flaming", "label": "Flamme" },
+                { "value": "text-3d", "label": "3D" },
+                { "value": "text-distant", "label": "Distant" }
+
+            ]
+        },
+        {
+            "type": "select",
+            "id": "heading_tag",
+            "label": "Balise titre (SEO)",
+            "default": "h2",
+            "options": [
+                { "value": "h1", "label": "h1" },
+                { "value": "h2", "label": "h2" },
+                { "value": "h3", "label": "h3" },
+                { "value": "h4", "label": "h4" },
+                { "value": "h5", "label": "h5" },
+                { "value": "h6", "label": "h6" },
+                { "value": "span", "label": "Aucune" }
+            ]
+        },
+        {
+            "type": "select",
+            "id": "title_size",
+            "label": "Taille du titre",
+            "default": "h2",
+            "options": [
+                { "group": "Titre Supérieur", "value": "display-1", "label": "Extra Extra Grand" },
+                { "group": "Titre Supérieur", "value": "display-2", "label": "Extra Grand" },
+                { "group": "Titre Supérieur", "value": "display-3", "label": "Ultra Grand" },
+                { "group": "Titre Supérieur", "value": "display-4", "label": "Super Grand" },
+                { "group": "Titre Standard", "value": "h1", "label": "Très Grand" },
+                { "group": "Titre Standard", "value": "h2", "label": "Grand" },
+                { "group": "Titre Standard", "value": "h3", "label": "Moyen" },
+                { "group": "Titre Standard", "value": "h4", "label": "Petit" },
+                { "group": "Titre Standard", "value": "h5", "label": "Très Petit" },
+                { "group": "Titre Standard", "value": "h6", "label": "Super Petit" }
+            ]
+        },
+		{
+			"type":"textarea",
+			"id":"typewriter_text",
+			"label":"Texte dynamique",
+            "default": "\"Booster les conversions.\", \"Stimuler vos ventes.\", \"Proposer une valeur unique.\"",
+			"info":"Veuillez ajouter du texte au format JSON. Exemple: \"Booster les conversions.\", \"Stimuler vos ventes.\", \"Proposer une valeur unique.\""
+		},
+		{
+			"type":"color",
+			"id":"color_typewriter_text",
+			"label":"Couleur du texte dynamique",
+			"default":"#C99700"
+		},
+        {
+            "type": "color",
+            "id": "typewriter_cursor_color",
+            "label": "Couleur du curseur dynamique",
+            "default": "#fff"
+        },
+        {
+            "type": "header",
+            "content": "Espacement de la section"
+        },
+        {
+            "type": "range",
+            "id": "pt",
+            "label": "Haut interne",
+            "min": 0,
+            "max": 20,
+            "step": 1,
+            "default": 0
+        },
+        {
+            "type": "range",
+            "id": "pb",
+            "label": "Bas interne",
+            "min": 0,
+            "max": 20,
+            "step": 1,
+            "default": 0
+        },
+        {
+            "type": "range",
+            "id": "mt",
+            "label": "Haut externe",
+            "min": 0,
+            "max": 20,
+            "step": 1,
+            "default": 0
+        },
+        {
+            "type": "range",
+            "id": "mb",
+            "label": "Bas externe",
+            "min": 0,
+            "max": 20,
+            "step": 1,
+            "default": 0
+        },
+        {
+            "type": "header",
+            "content": "Visibilité",
+            "info": "Afficher/masquer cette section en fonction de la résolution de l'écran"
+        },
+        {
+            "type": "checkbox",
+            "id": "visibility_xs",
+            "label": "Afficher sur mobile",
+            "default": true
+        },
+        {
+            "type": "checkbox",
+            "id": "visibility_md",
+            "label": "Afficher sur tablette",
+            "default": true
+        },
+        {
+            "type": "checkbox",
+            "id": "visibility_lg",
+            "label": "Afficher sur bureau",
+            "default": true
+        }
+	],
+    "presets": [
+      {
+        "name": "Texte dynamique",
+        "category": "Contenus"
+      }
+    ]
+  }
+{% endschema %}
+
+{% javascript %}
+
+ var TxtType = function(el, toRotate, period) {
+        this.toRotate = toRotate;
+        this.el = el;
+        this.loopNum = 0;
+        this.period = parseInt(period, 10) || 2000;
+        this.txt = '';
+        this.tick();
+        this.isDeleting = false;
+    };
+
+    TxtType.prototype.tick = function() {
+        var i = this.loopNum % this.toRotate.length;
+        var fullTxt = this.toRotate[i];
+
+        if (this.isDeleting) {
+        this.txt = fullTxt.substring(0, this.txt.length - 1);
+        } else {
+        this.txt = fullTxt.substring(0, this.txt.length + 1);
+        }
+
+        this.el.innerHTML = '<span class="wrap">'+this.txt+'</span>';
+
+        var that = this;
+        var delta = 200 - Math.random() * 100;
+
+        if (this.isDeleting) { delta /= 2; }
+
+        if (!this.isDeleting && this.txt === fullTxt) {
+        delta = this.period;
+        this.isDeleting = true;
+        } else if (this.isDeleting && this.txt === '') {
+        this.isDeleting = false;
+        this.loopNum++;
+        delta = 500;
+        }
+
+        setTimeout(function() {
+        that.tick();
+        }, delta);
+    };
+
+    window.onload = function() {
+        var elements = document.getElementsByClassName('typewrite');
+        for (var i = 0; i < elements.length; i++) {
+            var toRotate = elements[i].getAttribute('data-type');
+            var period = elements[i].getAttribute('data-period');
+            if (toRotate) {
+                new TxtType(elements[i], JSON.parse(toRotate), period);
+            }
+            var borderColor = elements[i].getAttribute('data-cursor-color') || "#fff";
+            var parent = elements[i].closest('section[id^="dynamic-"]');
+            var styleId = 'typewrite-cursor-style-' + i;
+            var css = document.createElement("style");
+            css.id = styleId;
+            var scope = parent ? ('#' + parent.id + ' ') : '';
+            css.innerHTML = scope + ".typewrite > .wrap { border-right: 0.08em solid " + borderColor + "; }";
+            document.head.appendChild(css);
+        }
+    };
+
+{% endjavascript %}

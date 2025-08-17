@@ -1,0 +1,949 @@
+{% comment %}
+---------------------------------------------------------
+Copyright © 2019/2024 Theme Shopiweb Premium. Tous droits réservés.
+La copie, la modification, la distribution ou l'utilisation
+non autorisée de ce code ou de toute partie de celui-ci est formellement interdite.
+Les contrevenants seront poursuivis dans toute la mesure permise par la loi.
+---------------------------------------------------------
+{% endcomment %}
+
+{% liquid 
+    assign pt = section.settings.pt | prepend: 'pt-'
+    assign pb = section.settings.pb | prepend: 'pb-'
+    assign mt = section.settings.mt | prepend: 'mt-'
+    assign mb = section.settings.mb | prepend: 'mb-'
+
+    if section.settings.bg_type == 'custom'
+        assign text_color_class = section.settings.bg_color | split: " " | last
+        assign bg_class = 'content-bg-gradient ' | append: text_color_class
+    elsif section.settings.bg_type == 'image'
+        assign bg_class = section.settings.bg_color | split: " " | last
+    else
+        assign bg_class = section.settings.bg_color
+    endif
+
+    assign btn_shadow_sp = settings.btn_shadow_sp
+%}
+
+<section 
+    id="contact-form-{{ section.id }}" 
+    class="contact-form enter-view {{ bg_class }} {{ pt }} {{ pb }} {{ mt }} {{ mb }}"
+
+    {% if section.settings.bg_type == 'image' %}
+        style="background-image: url('{{ section.settings.background_img.src | image_url }}'); 
+               background-size: cover; 
+               background-repeat: no-repeat; 
+               background-position: center center;
+               position: relative;"
+    {% elsif section.settings.bg_type == 'custom' %}
+        style="background: {{ section.settings.bg_gradient_color }};"
+    {% endif %}>
+
+    {% if section.settings.bg_type == 'image' %}
+        <div class="background-overlay" 
+             style="background: rgba(0, 0, 0, {{ section.settings.background_img_opacity }});">
+        </div>
+        <div class="background-overlay-blur" 
+             style="backdrop-filter: blur({{ section.settings.background_img_blur }}px);
+                    -webkit-backdrop-filter: blur({{ section.settings.background_img_blur }}px);">
+        </div>
+    {% endif %}
+  
+    <div class="{{ section.settings.container }} position-relative" 
+        {% if section.settings.container == 'container-fluid' %}
+           style="max-width: {{ section.settings.max_width }}px;"
+        {% endif %}>
+        
+        <div class="{{ section.settings.text_align_mobile }} {{ section.settings.text_align_desktop }}">
+            {% render 'section-header' %}
+        </div>
+
+        {% form 'contact', class: 'contact-form my-4' %}
+            {% if form.posted_successfully? %}
+                <div class="form-success rte alert alert-success mb-6" role="alert">
+                    {{ section.settings.form_success_msg }}
+                </div>
+            {% endif %}
+            {{ form.errors | default_errors }}
+            
+            {% for block in section.blocks %}
+                {% if block.type == 'text' %}
+                    <div class="form-group mb-5" {{ block.shopify_attributes }}>
+                        {% unless block.settings.title == blank %}
+                            <{{ block.settings.heading_tag }} class="title mb-2 {{ block.settings.title_size }}">
+                                {{ block.settings.title }}
+                            </{{ block.settings.heading_tag }}>
+                        {% endunless %}
+                        {% unless block.settings.description == blank %}
+                            <div class="description rte text-muted {{ block.settings.description_size }}">
+                                {{ block.settings.description }}
+                            </div>
+                        {% endunless %}
+                    </div>
+                {% elsif block.type == 'input_field' %}
+                    {% liquid 
+                        assign input_name = block.settings.label | handleize
+
+                        if input_name contains 'mail'
+                            assign input_name = 'email'
+                        endif
+                    %}
+                    <div class="form-group mb-4" {{ block.shopify_attributes }}>
+                        {% if block.settings.type == 'date' or block.settings.type == 'time' %}
+                            <label for="input-{{ block.id }}" class="form-label mb-2">
+                                {{ block.settings.label }} {% unless block.settings.required %}({{ 'general.general.optional' | t }}){% endunless %}
+                            </label>
+                        {% endif %}
+                        <input 
+                            id="input-{{ block.id }}"
+                            class="form-control form-control-{{ section.settings.form_fields_size }}" 
+                            type="{{ block.settings.type }}" 
+                            name="contact[{{ input_name }}]"
+                            placeholder="{{ block.settings.label }} {% unless block.settings.required %}({{ 'general.general.optional' | t }}){% endunless %}"
+                            aria-label=" {{ block.settings.label }} {% unless block.settings.required %}({{ 'general.general.optional' | t }}){% endunless %}"
+                            {% if block.settings.required %}required{% endif %}>
+                    </div>
+                {% elsif block.type == 'textarea' %}
+                    <div class="form-group mb-4" {{ block.shopify_attributes }}>
+                        <textarea 
+                            class="form-control form-control-{{ section.settings.form_fields_size }}"
+                            rows="{{ block.settings.rows }}"
+                            name="contact[{{ block.settings.label | handleize }}]"
+                            placeholder="{{ block.settings.label }} {% unless block.settings.required %}({{ 'general.general.optional' | t }}){% endunless %}" 
+                            aria-label="{{ block.settings.label }} {% unless block.settings.required %}({{ 'general.general.optional' | t }}){% endunless %}" 
+                            {% if block.settings.required %}required{% endif %}></textarea>
+                    </div>
+                {% elsif block.type == 'select' %}
+                    {% assign options = block.settings.options | split: ',' %}
+                    <div class="form-group mb-4" {{ block.shopify_attributes }}>
+                        <select 
+                            class="form-select form-select-{{ section.settings.form_fields_size }}"
+                            name="contact[{{ block.settings.label | handleize }}]"
+                            placeholder="{{ block.settings.label }} {% unless block.settings.required %}({{ 'general.general.optional' | t }}){% endunless %}" 
+                            aria-label="{{ block.settings.label }} {% unless block.settings.required %}({{ 'general.general.optional' | t }}){% endunless %}" 
+                            {% if block.settings.required %}required{% endif %}>
+                            <option>
+                                {{ block.settings.label }} {% unless block.settings.required %}({{ 'general.general.optional' | t }}){% endunless %}
+                            </option>
+                            {% for option in options %}
+                                <option value="{{ option | handleize }}">
+                                    {{ option }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                {% elsif block.type == 'checkbox_radio' %}
+                    {% assign options = block.settings.options | split: ',' %}
+                    <div class="form-group mb-5" {{ block.shopify_attributes }}>
+                        <p class="mb-3 fw-500">
+                            {{ block.settings.label }} {% unless block.settings.required %}({{ 'general.general.optional' | t }}){% endunless %}
+                        </p>
+                        {% for option in options %}
+                            <div class="form-check">
+                                <input 
+                                    id="input-{{ block.id }}-{{ forloop.index }}"
+                                    class="form-check-input" 
+                                    type="{{ block.settings.type }}" 
+                                    name="contact[{{ block.settings.label | handleize }}]"
+                                    {% if block.settings.type == 'checkbox' %}
+                                    name="contact[{{ block.settings.label | handleize }}-{{ forloop.index }}]"
+                                    {% else %}
+                                    name="contact[{{ block.settings.label | handleize }}]"
+                                    {% endif %}
+                                    value="{{ option }}">
+                                <label for="input-{{ block.id }}-{{ forloop.index }}" class="form-check-label">
+                                    {{ option }}
+                                </label>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% elsif block.type == 'range' %}
+                    <div class="form-group mb-4" {{ block.shopify_attributes }}>
+                        <label for="input-{{ block.id }}" class="form-label h5 mb-1">
+                            {{ block.settings.label }} {% unless block.settings.required %}({{ 'general.general.optional' | t }}){% endunless %}
+                        </label>
+                        <div class="d-flex align-items center">
+                            <input 
+                                id="input-{{ block.id }}"
+                                class="form-range" 
+                                type="range" 
+                                name="contact[{{ block.settings.label | handleize }}]"
+                                min="{{ block.settings.min_value }}"
+                                max="{{ block.settings.max_value }}"
+                                step="{{ block.settings.step }}"
+                                {% if block.settings.required %}required{% endif %}
+                                oninput="this.nextElementSibling.value = this.value">
+                                <output class="ms-3">
+                                    {{ block.settings.max_value | divided_by: 2 }}
+                                </output>
+                                /{{ block.settings.max_value }}
+                        </div>
+                    </div>
+                {% elsif block.type == 'submit_btn' %}
+                    <div class="form-group mb-4" {{ block.shopify_attributes }}>
+                        <button 
+                            type="submit" 
+                            class="btn w-100 {{ block.settings.btn_color }} {{ btn_shadow_sp }} {{ section.settings.form_fields_size | prepend: 'btn-' }}">
+                            {{ block.settings.btn_text }}
+                        </button>
+                    </div>
+                {% elsif block.type == 'separator' %}
+                    {% liquid 
+                        assign mt = block.settings.mt | prepend: 'mt-'
+                        assign mb = block.settings.mb | prepend: 'mb-'
+                    %}
+                    <hr class="{{ mt }} {{ mb }}" style="opacity: {{ block.settings.opacity }}; color: {{ block.settings.separator_color }};">
+                {% endif %}
+            {% endfor %}
+        {% endform %}
+    </div>
+</section>
+
+{% schema %}
+{
+    "name": "🏆 Formulaire de contact",
+    "settings": [
+        {
+          "type":"header",
+          "content": "🏆 Application Formulaire de contact",
+          "info": "👉 Application Version Shopiweb Premium"
+        },
+        {
+            "type": "paragraph", 
+            "content": "Documentation FR : [Formulaire de contact by Shopiweb](https:\/\/www.docs.shopiweb.fr\/theme-premium\/documentation\/sections\/formulaire-de-contact)"
+        },
+        {
+            "type": "header",
+            "content": "Général"
+        },
+        {
+            "type": "select",
+            "id": "bg_type",
+            "label": "Type d'arrière-plan",
+            "default": "predefined",
+            "options": [
+                { "value": "predefined", "label": "Couleur" },
+                { "value": "custom", "label": "Fondu" },
+                { "value": "image", "label": "Image" }
+            ]
+        },
+        {
+            "type": "select",
+            "id": "bg_color",
+            "label": "Couleur d'arrière plan",
+            "default": "bg-body text-body",
+            "options": [
+                { "group": "Principal", "value": "bg-primary text-white", "label": "Primaire (Texte blanc)" },
+                { "group": "Principal", "value": "bg-secondary text-white", "label": "Secondaire (Texte blanc)" },
+                { "group": "Principal", "value": "bg-tertiary text-white", "label": "Tertiaire (Texte blanc)" },
+                { "group": "Intermédiaire", "value": "bg-white text-dark", "label": "Blanc (Texte noir)" },
+                { "group": "Intermédiaire", "value": "bg-light text-body", "label": "Claire (Texte noir)" },
+                { "group": "Intermédiaire", "value": "bg-dark text-white", "label": "Sombre (Texte blanc)" },
+                { "group": "Par défaut", "value": "bg-body text-body", "label": "Corps (body) (Texte noir)" }
+            ],
+            "info": "S'applique également au texte si vous sélectionnez un dégradé personnalisé ou une image d'arrière-plan."
+        },
+        {
+            "type": "color_background",
+            "id": "bg_gradient_color",
+            "label": "Dégradé personnalisé",
+            "default": "linear-gradient(180deg, #6c757d 0%, #343a40 100%)",
+            "visible_if": "{{ section.settings.bg_type == 'custom' }}"
+        },
+        {
+            "type": "image_picker",
+            "id": "background_img",
+            "label": "Image d'arrière-plan",
+            "visible_if": "{{ section.settings.bg_type == 'image' }}"
+        },
+        {
+            "type": "range",
+            "id": "background_img_opacity",
+            "label": "Opacité",
+            "min": 0,
+            "max": 1,
+            "step": 0.1,
+            "default": 0.3,
+            "visible_if": "{{ section.settings.bg_type == 'image' }}"
+        },
+        {
+            "type": "range",
+            "id": "background_img_blur",
+            "label": "Flou",
+            "min": 0,
+            "max": 10,
+            "step": 1,
+            "default": 0,
+            "visible_if": "{{ section.settings.bg_type == 'image' }}"
+        },
+        {
+            "type": "header",
+            "content": "Mise en page"
+        },
+        {
+            "type": "select",
+            "id": "container",
+            "label": "Conteneur",
+            "default": "container",
+            "options": [
+                { "value": "container", "label": "Page" },
+                { "value": "container-fluid", "label": "Personnalisé" }
+            ]
+        },
+        {
+            "type": "text",
+            "id": "max_width",
+            "label": "Largeur max. (px)",
+            "default": "640",
+            "visible_if": "{{ section.settings.container == 'container-fluid' }}"
+        },
+        {
+            "type": "select",
+            "id": "text_align_mobile",
+            "label": "Alignement du texte - mobile",
+            "default": "text-center",
+            "options": [
+                { "value": "text-start", "label": "Gauche" },
+                { "value": "text-center", "label": "Centre" },
+                { "value": "text-end", "label": "Droite" }
+            ]
+        },
+        {
+            "type": "select",
+            "id": "text_align_desktop",
+            "label": "Alignement du texte - bureau",
+            "default": "text-lg-center",
+            "options": [
+                { "value": "text-lg-start", "label": "Gauche" },
+                { "value": "text-lg-center", "label": "Centre" },
+                { "value": "text-lg-end", "label": "Droite" }
+            ]
+        },
+        {
+            "type": "header",
+            "content": "En-tête de la section"
+        },
+        {
+            "type": "image_picker",
+            "id": "subtitle_img",
+            "label": "Légende Image"
+        },
+        {
+            "type": "text",
+            "id": "brand_image_size",
+            "label": "Image Largeur/Hauteur (px)",
+            "default": "60"
+        },
+        {
+            "type": "text",
+            "id": "subtitle",
+            "label": "Légende Texte"
+        },
+        {
+            "type": "select",
+            "id": "subtitle_size",
+            "label": "Taille de la légende",
+            "default": "fs-5",
+            "options": [
+                { "group": "Légende Standard", "value": "fs-1", "label": "Extra Grand" },
+                { "group": "Légende Standard", "value": "fs-2", "label": "Super Grand" },
+                { "group": "Légende Standard", "value": "fs-3", "label": "Très Grand" },
+                { "group": "Légende Standard", "value": "fs-4", "label": "Grand" },
+                { "group": "Légende Standard", "value": "fs-5", "label": "Moyen" },
+                { "group": "Légende Standard", "value": "fs-6", "label": "Petit" } 
+            ]
+        },
+        {
+            "type": "color",
+            "id": "color_caption",
+            "label": "Couleur de la légende",
+            "default": "#6c757d"
+        },
+        {
+            "type": "text",
+            "id": "title_overlay",
+            "label": "Titre overlay",
+            "info": "Laisser vide pour désactiver"
+        },
+        {
+            "type": "select",
+            "id": "title_overlay_position",
+            "label": "Position du titre overlay",
+            "default": "center",
+            "options": [
+                { "value": "top", "label": "Haut" },
+                { "value": "center", "label": "Centre" }
+            ]
+        },
+        {
+            "type": "select",
+            "id": "title_overlay_size",
+            "label": "Taille du titre overlay",
+            "default": "3",
+            "options": [
+                { "group": "Titre Overlay", "value": "4", "label": "Grand" },
+                { "group": "Titre Overlay", "value": "3", "label": "Moyen" },
+                { "group": "Titre Overlay", "value": "2", "label": "Petit" }
+            ]
+        },
+        {
+            "type": "color",
+            "id": "color_title_overlay",
+            "label": "Couleur du titre overlay",
+            "default": "#000000"
+        },
+        {
+            "type": "range",
+            "id": "title_overlay_opacity",
+            "label": "Opacité du titre overlay",
+            "default": 0.1,
+            "min": 0,
+            "max": 1,
+            "step": 0.1
+        },
+        {
+            "type": "checkbox",
+            "id": "apply_text_stroke",
+            "label": "Appliquer un effet contour de texte (stroke)",
+            "default": false
+        },
+        {
+            "type": "inline_richtext",
+            "id": "title",
+            "label": "Titre",
+            "default": "Une question à nous poser ?"
+        },
+        {
+            "type": "paragraph",
+            "content": "Pour ajouter une surbrillance animée à un texte, mettez-le en italique en cliquant sur le bouton 'I' dans l'éditeur."
+        },
+        {
+            "type": "select",
+            "id": "italic_color_option",
+            "label": "Appliquer un style au texte en italique",
+            "options": [
+                { "value": "none", "label": "Aucun" },
+                { "value": "apply_color", "label": "Appliquer une couleur" },
+                { "value": "stencil", "label": "Appliquer le style pochoir" },
+                { "value": "background_cover", "label": "Appliquer le style surbrillance" },
+                { "value": "gradient_color", "label": "Appliquer une couleur dégradé" }
+            ],
+            "default": "none",
+            "info": "Choisissez comment styliser le texte en italique : sans style supplémentaire, avec une couleur, avec un effet de pochoir ou un style de surbrillance."
+        },
+        {
+            "type": "select",
+            "id": "highlighted_text_style",
+            "label": "Appliquer un style de soulignement au texte en italique",
+            "options": [
+                { "value": "none", "label": "Aucun" },
+                { "value": "basic_underline", "label": "Soulignement Basique" },
+                { "value": "squiggle_underline", "label": "Soulignement Ondulé" },
+                { "value": "squiggle_underline_2", "label": "Soulignement Signature" },
+                { "value": "circle_underline", "label": "Soulignement Cercle" },
+                { "value": "sketch_underline", "label": "Soulignement Esquisse" },
+                { "value": "heartbeat_underline", "label": "Soulignement Rythme" },
+                { "value": "zigzag_underline", "label": "Soulignement Zigzag" },
+                { "value": "wave_underline", "label": "Soulignement Vague" },
+                { "value": "double_zigzag_underline", "label": "Soulignement Double Zigzag" }
+            ],
+            "default": "none",
+            "info": "Choisissez un style de soulignement SVG pour le texte en surbrillance italique. Sélectionnez 'Aucun' pour ne pas appliquer de soulignement."
+        },
+        {
+            "type": "color",
+            "id": "highlight_color",
+            "label": "Couleur de surbrillance",
+            "default": "#25D366",
+            "info": "Couleur appliquée au texte en italique et au SVG de soulignement, si activés."
+        },
+        {
+            "type": "color_background",
+            "id": "title_gradient_color",
+            "label": "Dégradé de surbrillance",
+            "default": "linear-gradient(90deg, #c99700 0%, #1d1d1f 100%)",
+            "info": "Couleur dégradé appliquée au texte en italique, si activés et uniquement pour le style 'Appliquer une couleur dégradé'."
+        },
+        {
+            "type": "select",
+            "id": "heading_tag",
+            "label": "Balise titre (SEO)",
+            "default": "h2",
+            "options": [
+                { "value": "h1", "label": "h1" },
+                { "value": "h2", "label": "h2" },
+                { "value": "h3", "label": "h3" },
+                { "value": "h4", "label": "h4" },
+                { "value": "h5", "label": "h5" },
+                { "value": "h6", "label": "h6" },
+                { "value": "span", "label": "Aucune" }
+            ]
+        },
+        {
+            "type": "select",
+            "id": "title_size",
+            "label": "Taille du titre",
+            "default": "h2",
+            "options": [
+                { "group": "Titre Supérieur", "value": "display-1", "label": "Extra Extra Grand" },
+                { "group": "Titre Supérieur", "value": "display-2", "label": "Extra Grand" },
+                { "group": "Titre Supérieur", "value": "display-3", "label": "Ultra Grand" },
+                { "group": "Titre Supérieur", "value": "display-4", "label": "Super Grand" },
+                { "group": "Titre Standard", "value": "h1", "label": "Très Grand" },
+                { "group": "Titre Standard", "value": "h2", "label": "Grand" },
+                { "group": "Titre Standard", "value": "h3", "label": "Moyen" },
+                { "group": "Titre Standard", "value": "h4", "label": "Petit" },
+                { "group": "Titre Standard", "value": "h5", "label": "Très Petit" },
+                { "group": "Titre Standard", "value": "h6", "label": "Super Petit" }
+            ]
+        },
+        {
+            "type": "checkbox",
+            "id": "show_svg_h2",
+            "label": "Afficher le SVG sous-titre",
+            "default": true,
+            "info": "Activez cette option pour afficher le SVG sous le titre, tel que défini dans les paramètres du thème."
+        },
+        {
+            "type": "richtext",
+            "id": "description",
+            "label": "Description",
+            "default": "<p>Ajouter une description facultative à cette section</p>"
+        },
+        {
+            "type": "select",
+            "id": "description_size",
+            "label": "Taille de description",
+            "default": "fs-5",
+            "options": [
+                { "group": "Description Standard", "value": "fs-1", "label": "Extra Grand" },
+                { "group": "Description Standard", "value": "fs-2", "label": "Super Grand" },
+                { "group": "Description Standard", "value": "fs-3", "label": "Très Grand" },
+                { "group": "Description Standard", "value": "fs-4", "label": "Grand" },
+                { "group": "Description Standard", "value": "fs-5", "label": "Moyen" },
+                { "group": "Description Standard", "value": "fs-6", "label": "Petit" } 
+            ]
+        },
+        {
+            "type": "header",
+            "content": "Formulaire"
+        },
+        {
+            "type": "select",
+            "id": "form_fields_size",
+            "label": "Taille des champs",
+            "default": "md",
+            "options": [
+                { "value": "sm", "label": "Small" },
+                { "value": "md", "label": "Medium" },
+                { "value": "lg", "label": "Large" }
+            ]
+        },
+        {
+            "type": "richtext",
+            "id": "form_success_msg",
+            "label": "Succès Message",
+            "default": "<p>Merci de nous avoir contactés. Nous vous répondrons dans les plus brefs délais.</p>"
+        },
+        {
+            "type": "header",
+            "content": "Espacement de la section"
+        },
+        {
+            "type": "range",
+            "id": "pt",
+            "label": "Haut interne",
+            "min": 0,
+            "max": 20,
+            "step": 1,
+            "default": 0
+        },
+        {
+            "type": "range",
+            "id": "pb",
+            "label": "Bas interne",
+            "min": 0,
+            "max": 20,
+            "step": 1,
+            "default": 0
+        },
+        {
+            "type": "range",
+            "id": "mt",
+            "label": "Haut externe",
+            "min": 0,
+            "max": 20,
+            "step": 1,
+            "default": 0
+        },
+        {
+            "type": "range",
+            "id": "mb",
+            "label": "Bas externe",
+            "min": 0,
+            "max": 20,
+            "step": 1,
+            "default": 0
+        }
+    ],
+    "blocks": [
+        {
+            "type": "text",
+            "name": "⚙️ Texte",
+            "settings": [
+                {
+                    "type": "paragraph",
+                    "content": "⚙️ Fonctionnalité 👉 Version Shopiweb Premium"
+                },
+                {
+                    "type": "text",
+                    "id": "title",
+                    "label": "Titre",
+                    "default": "Votre titre",
+                    "info": "Laisser vide pour désactiver"
+                },
+                {
+                    "type": "select",
+                    "id": "heading_tag",
+                    "label": "Balise titre (SEO)",
+                    "default": "h3",
+                    "options": [
+                        { "value": "h1", "label": "h1" },
+                        { "value": "h2", "label": "h2" },
+                        { "value": "h3", "label": "h3" },
+                        { "value": "h4", "label": "h4" },
+                        { "value": "h5", "label": "h5" },
+                        { "value": "h6", "label": "h6" },
+                        { "value": "span", "label": "Aucune" }
+                    ]
+                },
+                {
+                    "type": "select",
+                    "id": "title_size",
+                    "label": "Taille du titre",
+                    "default": "h5",
+                    "options": [
+                        { "group": "Titre Standard", "value": "h1", "label": "Très Grand" },
+                        { "group": "Titre Standard", "value": "h2", "label": "Grand" },
+                        { "group": "Titre Standard", "value": "h3", "label": "Moyen" },
+                        { "group": "Titre Standard", "value": "h4", "label": "Petit" },
+                        { "group": "Titre Standard", "value": "h5", "label": "Très Petit" },
+                        { "group": "Titre Standard", "value": "h6", "label": "Super Petit" }
+                    ]
+                },
+                {
+                    "type": "richtext",
+                    "id": "description",
+                    "label": "Description",
+                    "default": "<p>Ecrire quelques informations utiles ici</p>",
+                    "info": "Laisser vide pour désactiver"
+                },
+                {
+                    "type": "select",
+                    "id": "description_size",
+                    "label": "Taille de description",
+                    "default": "fs-5",
+                    "options": [
+                        { "group": "Description Standard", "value": "fs-1", "label": "Extra Grand" },
+                        { "group": "Description Standard", "value": "fs-2", "label": "Super Grand" },
+                        { "group": "Description Standard", "value": "fs-3", "label": "Très Grand" },
+                        { "group": "Description Standard", "value": "fs-4", "label": "Grand" },
+                        { "group": "Description Standard", "value": "fs-5", "label": "Moyen" },
+                        { "group": "Description Standard", "value": "fs-6", "label": "Petit" } 
+                    ]
+                }
+            ]
+        },
+        {
+            "type": "input_field",
+            "name": "⚙️ Champ de saisie",
+            "settings": [
+                {
+                    "type": "paragraph",
+                    "content": "⚙️ Fonctionnalité 👉 Version Shopiweb Premium"
+                },
+                {
+                    "type": "select",
+                    "id": "type",
+                    "label": "Type",
+                    "default": "text",
+                    "options": [
+                        { "value": "text", "label": "Texte" },
+                        { "value": "email", "label": "Email" },
+                        { "value": "phone", "label": "Téléphone" },
+                        { "value": "url", "label": "URL" },
+                        { "value": "date", "label": "Date" },
+                        { "value": "time", "label": "Heure" }
+                    ]
+                },
+                {
+                    "type": "text",
+                    "id": "label",
+                    "label": "Label",
+                    "default": "Nom"
+                },
+                {
+                    "type": "checkbox",
+                    "id": "required",
+                    "label": "Requis",
+                    "default": true,
+                    "info": "S'il est désactivé, ce champ sera marqué comme facultatif et les utilisateurs pourront soumettre le formulaire sans avoir à le remplir."
+                }
+            ]
+        },
+        {
+            "type": "textarea",
+            "name": "Zone de texte",
+            "settings": [
+                {
+                    "type": "range",
+                    "id": "rows",
+                    "label": "Rangs",
+                    "min": 2,
+                    "max": 20,
+                    "step": 1,
+                    "default": 8
+                },
+                {
+                    "type": "text",
+                    "id": "label",
+                    "label": "Label",
+                    "default": "Commentaire"
+                },
+                {
+                    "type": "checkbox",
+                    "id": "required",
+                    "label": "Requis",
+                    "default": true,
+                    "info": "S'il est désactivé, ce champ sera marqué comme facultatif et les utilisateurs pourront soumettre le formulaire sans avoir à le remplir."
+                }
+            ]
+        },
+        {
+            "type": "select",
+            "name": "⚙️ Liste déroulante",
+            "settings": [
+                {
+                    "type": "paragraph",
+                    "content": "⚙️ Fonctionnalité 👉 Version Shopiweb Premium"
+                },
+                {
+                    "type": "text",
+                    "id": "label",
+                    "label": "Label",
+                    "default": "Sélectionner une ville"
+                },
+                {
+                    "type": "checkbox",
+                    "id": "required",
+                    "label": "Requis",
+                    "default": true,
+                    "info": "S'il est désactivé, ce champ sera marqué comme facultatif et les utilisateurs pourront soumettre le formulaire sans avoir à le remplir."
+                },
+                {
+                    "type": "html",
+                    "id": "options",
+                    "label": "Options",
+                    "default": "New York, London, Paris",
+                    "info": "Liste d'options séparées par des virgules. Par exemple New York, Londres, Paris"
+                }
+            ]
+        },
+        {
+            "type": "checkbox_radio",
+            "name": "⚙️ Checkbox/Radio",
+            "settings": [
+                {
+                    "type": "paragraph",
+                    "content": "⚙️ Fonctionnalité 👉 Version Shopiweb Premium"
+                },
+                {
+                    "type": "select",
+                    "id": "type",
+                    "label": "Type",
+                    "default": "checkbox",
+                    "options": [
+                        { "value": "checkbox", "label": "Checkbox" },
+                        { "value": "radio", "label": "Radio" }
+                    ]
+                },
+                {
+                    "type": "text",
+                    "id": "label",
+                    "label": "Label",
+                    "default": "Sélectionner une ville"
+                },
+                {
+                    "type": "html",
+                    "id": "options",
+                    "label": "Options",
+                    "default": "New York, London, Paris",
+                    "info": "Liste d'options séparées par des virgules. Par exemple New York, Londres, Paris"
+                }
+            ]
+        },
+        {
+            "type": "range",
+            "name": "⚙️ Range",
+            "settings": [
+                {
+                    "type": "paragraph",
+                    "content": "⚙️ Fonctionnalité 👉 Version Shopiweb Premium"
+                },
+                {
+                    "type": "text",
+                    "id": "label",
+                    "label": "Label",
+                    "default": "Note Shopiweb"
+                },
+                {
+                    "type": "checkbox",
+                    "id": "required",
+                    "label": "Requis",
+                    "default": true,
+                    "info": "S'il est désactivé, ce champ sera marqué comme facultatif et les utilisateurs pourront soumettre le formulaire sans avoir à le remplir."
+                },
+                {
+                    "type": "text",
+                    "id": "min_value",
+                    "label": "Valeur minimale",
+                    "default": "0"
+                },
+                {
+                    "type": "text",
+                    "id": "max_value",
+                    "label": "Valeur maximale",
+                    "default": "10"
+                },
+                {
+                    "type": "text",
+                    "id": "step",
+                    "label": "Étape",
+                    "default": "1"
+                }
+            ]
+        },
+        {
+            "type": "submit_btn",
+            "name": "Bouton d'envoi",
+            "limit": 1,
+            "settings": [
+                {
+                    "type": "text",
+                    "id": "btn_text",
+                    "label": "Texte du bouton",
+                    "default": "Envoyer"
+                },
+                {
+                    "type": "select",
+                    "id": "btn_color",
+                    "label": "Couleur du bouton",
+                    "default": "btn-primary",
+                    "options": [
+                        { "group": "Normal", "value": "btn-link", "label": "Lien" },
+                        { "group": "Normal", "value": "btn-light", "label": "Claire" },
+                        { "group": "Normal", "value": "btn-dark", "label": "Sombre" },
+                        { "group": "Normal", "value": "btn-primary", "label": "Primaire" },
+                        { "group": "Normal", "value": "btn-secondary", "label": "Secondaire" },
+                        { "group": "Normal", "value": "btn-tertiary", "label": "Tertiaire" },
+                        { "group": "Normal", "value": "btn-success", "label": "Succès" },
+                        { "group": "Normal", "value": "btn-danger", "label": "Danger" },
+                        { "group": "Normal", "value": "btn-warning", "label": "Avertissement" },
+                        { "group": "Normal", "value": "btn-info", "label": "Info" },
+                        { "group": "Contour", "value": "btn-outline-light", "label": "Contour Claire" },
+                        { "group": "Contour", "value": "btn-outline-dark", "label": "Contour Sombre" },
+                        { "group": "Contour", "value": "btn-outline-primary", "label": "Contour Primaire" },
+                        { "group": "Contour", "value": "btn-outline-secondary", "label": "Contour Secondaire" },
+                        { "group": "Contour", "value": "btn-outline-tertiary", "label": "Contour Tertiaire" },
+                        { "group": "Contour", "value": "btn-outline-success", "label": "Contour Succès" },
+                        { "group": "Contour", "value": "btn-outline-danger", "label": "Contour Danger" },
+                        { "group": "Contour", "value": "btn-outline-warning", "label": "Contour Avertissement" },
+                        { "group": "Contour", "value": "btn-outline-info", "label": "Contour Info" }
+                    ]
+                }
+            ]
+        },
+        {
+            "type": "separator",
+            "name": "⚙️ Séparateur",
+            "settings": [
+                {
+                    "type": "paragraph",
+                    "content": "⚙️ Fonctionnalité 👉 Version Shopiweb Premium"
+                },
+                {
+                  "type": "color",
+                  "id": "separator_color",
+                  "label": "Couleur de la bordure",
+                  "default": "#000"
+                },
+                {
+                    "type": "range",
+                    "id": "opacity",
+                    "label": "Opacité de la bordure",
+                    "min": 0,
+                    "max": 1,
+                    "step": 0.1,
+                    "default": 0.1
+                },
+                {
+                    "type": "range",
+                    "id": "mt",
+                    "label": "Haut externe",
+                    "min": 0,
+                    "max": 12,
+                    "step": 1,
+                    "default": 6
+                },
+                {
+                    "type": "range",
+                    "id": "mb",
+                    "label": "Bas externe",
+                    "min": 0,
+                    "max": 12,
+                    "step": 1,
+                    "default": 6
+                }
+            ]
+        }
+    ],
+    "presets": [
+        {
+            "name": "Formulaire de contact",
+            "category": "Engagement",
+            "blocks": [
+                {
+                    "type": "input_field",
+                    "settings": {
+                        "type": "text",
+                        "label": "Nom",
+                        "required": true
+                    }
+                },
+                {
+                    "type": "input_field",
+                    "settings": {
+                        "type": "email",
+                        "label": "Adresse E-mail",
+                        "required": true
+                    }
+                },
+                {
+                    "type": "input_field",
+                    "settings": {
+                        "type": "phone",
+                        "label": "Téléphone",
+                        "required": false
+                    }
+                },
+                {
+                    "type": "textarea"
+                },
+                {
+                    "type": "submit_btn"
+                }
+            ]
+        }
+    ]
+}
+{% endschema %}

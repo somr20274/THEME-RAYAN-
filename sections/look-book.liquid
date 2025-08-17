@@ -1,0 +1,786 @@
+{% comment %}
+---------------------------------------------------------
+Copyright © 2019/2024 Theme Shopiweb Premium. Tous droits réservés.
+La copie, la modification, la distribution ou l'utilisation
+non autorisée de ce code ou de toute partie de celui-ci est formellement interdite.
+Les contrevenants seront poursuivis dans toute la mesure permise par la loi.
+---------------------------------------------------------
+{% endcomment %}
+
+{% liquid 
+    assign pt = section.settings.pt | prepend: 'pt-'
+    assign pb = section.settings.pb | prepend: 'pb-'
+    assign mt = section.settings.mt | prepend: 'mt-'
+    assign mb = section.settings.mb | prepend: 'mb-'
+
+    if section.settings.bg_type == 'custom'
+        assign text_color_class = section.settings.bg_color | split: " " | last
+        assign bg_class = 'content-bg-gradient ' | append: text_color_class
+    else
+        assign bg_class = section.settings.bg_color
+    endif
+
+    assign btn_shadow_sp = settings.btn_shadow_sp
+
+    assign classes = ''
+    assign classes = classes | append: section.settings.img_style | append: ' ' 
+    assign classes = classes | append: section.settings.border | append: ' '
+    assign classes = classes | append: section.settings.border_color | append: ' ' 
+    assign classes = classes | append: 'border-' | append: section.settings.border_width | append: ' ' 
+    assign classes = classes | append: section.settings.shadow_sp | append: ' ' 
+    assign classes = classes | strip
+
+    assign visibility = ''
+
+    if section.settings.visibility_xs == false
+        assign visibility = 'd-none'
+    endif
+
+    if section.settings.visibility_md
+        assign visibility = ' d-md-block' | prepend: visibility
+    else 
+        assign visibility = ' d-md-none' | prepend: visibility
+    endif
+
+    if section.settings.visibility_lg
+        assign visibility = ' d-lg-block' | prepend: visibility
+    else 
+        assign visibility = ' d-lg-none' | prepend: visibility
+    endif
+%}
+
+{% style %}
+#look-book-{{ section.id }} .look-book-point {
+    border: 1px solid var({{ section.settings.point_color }});
+}
+    
+#look-book-{{ section.id }} .look-book-point span {
+    background: var({{ section.settings.point_color }});
+    width: {{ section.settings.point_diameter }}rem;
+    height: {{ section.settings.point_diameter }}rem;
+}
+
+#look-book-{{ section.id }} .look-book-point[aria-describedby] {
+}
+
+@keyframes animation_pulse_look_book {
+    0% {
+        box-shadow: 0 0 0 0px rgba(var({{ section.settings.point_color }}-rgb), 0.50);
+    }
+    100% {
+        box-shadow: 0 0 0 20px rgba(var({{ section.settings.point_color }}-rgb), 0);
+    }
+}
+    
+@media (max-width: 991px) {
+    {% for block in section.blocks %}
+        #look-book-{{ section.id }} .look-book-list-item:nth-child({{ forloop.index }}) {
+            left: {{ block.settings.mobile_pos_left }}%;
+            top: {{ block.settings.mobile_pos_top }}%;
+        }
+    {% endfor %}
+}
+
+@media (min-width: 992px) {
+    {% for block in section.blocks %}
+        #look-book-{{ section.id }} .look-book-list-item:nth-child({{ forloop.index }}) {
+            left: {{ block.settings.desktop_pos_left }}%;
+            top: {{ block.settings.desktop_pos_top }}%;
+        }
+    {% endfor %}
+}
+{% endstyle %}
+
+<section 
+    id="look-book-{{ section.id }}" 
+    class="look-book enter-view {{ bg_class }} {{ section.settings.text_align_mobile }} {{ section.settings.text_align_desktop }} {{ pt }} {{ pb }} {{ mt }} {{ mb }} {{ visibility }}"
+
+    {% if section.settings.bg_type == 'custom' %}
+        style="background: {{ section.settings.bg_gradient_color }};"
+    {% endif %}>
+  
+    <div class="{{ section.settings.container }}" 
+        {% if section.settings.container == 'container-fluid' %}
+           style="max-width: {{ section.settings.max_width }}px;"
+        {% endif %}>
+        {% render 'section-header' %}
+        <div class="position-relative">
+            <div class="d-lg-none">
+                {% if section.settings.mobile_image == blank %}
+                    {{ 'detailed-apparel-1' | placeholder_svg_tag: 'placeholder-svg rounded bg-light' }}
+                {% else %}
+                    <img
+                        class="img-fluid w-100 {{ classes }}"
+                        src="{{ section.settings.mobile_image.src | image_url: width: 800 }}"
+                        alt="{{ section.settings.mobile_image.alt | escape }}"
+                        width="800"
+                        height="{{ 600 | divided_by: section.settings.mobile_image.aspect_ratio | round }}"
+                        loading="lazy">
+                {% endif %}
+            </div>
+            <div class="d-none d-lg-block">
+                {% if section.settings.desktop_image == blank %}
+                    {{ 'detailed-apparel-1' | placeholder_svg_tag: 'placeholder-svg rounded bg-light' }}
+                {% else %}
+                    <img
+                        class="img-fluid w-100 {{ classes }}"
+                        src="{{ section.settings.desktop_image.src | image_url: width: 1600 }}"
+                        alt="{{ section.settings.desktop_image.alt | escape }}"
+                        width="1600"
+                        height="{{ 1600 | divided_by: section.settings.desktop_image.aspect_ratio | round }}"
+                        loading="lazy">
+                {% endif %}
+            </div>
+            <ul class="look-book-list list-unstyled" aria-label="Features">
+                {% for block in section.blocks %}
+                    <li class="look-book-list-item">
+                        {% assign product = block.settings.product %}
+                        <a
+                            class="look-book-point"  
+                            data-bs-trigger="focus"
+                            data-bs-toggle="popover" 
+                            data-bs-html="true"
+                            data-bs-placement="top"
+                            data-bs-title="{{ block.settings.title }}"
+                            tabindex="1"
+                            role="button"
+                            {% if product == blank %}
+                                data-bs-content="
+                                    {% unless block.settings.description == blank %}
+                                        {{ block.settings.description }}
+                                    {% endunless %}
+                                "
+                            {% else %}
+                                data-bs-content="
+                                    {% if block.settings.show_image %} 
+                                        <img class='img-fluid mb-4' src='{{ product.featured_image | image_url: width: 600 }}' width='600' height='{{ 600 | divided_by: product.featured_image.aspect_ratio | round }}' loading='lazy' />
+                                    {% endif %}
+                                    {% if block.settings.show_price %} 
+                                        <p class='product-item-price mb-2'>
+                                            <span class='product-item-price-final'>
+                                                {{ product.price | money }}
+                                            </span>
+                                            {% if product.compare_at_price > product.price %}
+                                                <span class='product-item-price-compare text-muted me-1'>
+                                                    <s>{{ product.compare_at_price | money }}</s>
+                                                </span>
+                                            {% endif %}
+                                        </p>
+                                    {% endif %}
+                                    {% unless block.settings.description == blank %}
+                                        {{ block.settings.description }}
+                                    {% endunless %}
+                                    {% unless block.settings.btn_text == blank %}
+                                    <a href='{{ product.url }}' class='btn btn-sm w-100 mt-4 {{ block.settings.btn_color }} {{ btn_shadow_sp }}'>
+                                        {{ block.settings.btn_text }}&nbsp;
+                                    </a>
+                                    {% endunless %}
+                                "
+                            {% endif %}
+                            aria-label="{{ block.settings.title }}">
+                            <span></span>
+                        </a>
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+</section>
+
+{% schema %}
+{
+    "name": "Galerie de styles",
+    "settings": [
+        {
+            "type": "paragraph", 
+            "content": "Documentation FR : [Galerie de Styles by Shopiweb](https:\/\/www.docs.shopiweb.fr\/theme-premium\/documentation\/sections\/galerie-de-style)"
+        },
+        {
+            "type": "header",
+            "content": "Général"
+        },
+        {
+            "type": "select",
+            "id": "bg_type",
+            "label": "Type d'arrière-plan",
+            "default": "predefined",
+            "options": [
+                { "value": "predefined", "label": "Couleur" },
+                { "value": "custom", "label": "Fondu" }
+            ]
+        },
+        {
+            "type": "select",
+            "id": "bg_color",
+            "label": "Couleur d'arrière plan",
+            "default": "bg-body text-body",
+            "options": [
+                { "group": "Principal", "value": "bg-primary text-white", "label": "Primaire (Texte blanc)" },
+                { "group": "Principal", "value": "bg-secondary text-white", "label": "Secondaire (Texte blanc)" },
+                { "group": "Principal", "value": "bg-tertiary text-white", "label": "Tertiaire (Texte blanc)" },
+                { "group": "Intermédiaire", "value": "bg-white text-dark", "label": "Blanc (Texte noir)" },
+                { "group": "Intermédiaire", "value": "bg-light text-body", "label": "Claire (Texte noir)" },
+                { "group": "Intermédiaire", "value": "bg-dark text-white", "label": "Sombre (Texte blanc)" },
+                { "group": "Par défaut", "value": "bg-body text-body", "label": "Corps (body) (Texte noir)" }
+            ],
+            "info": "S'applique également au texte si vous sélectionnez un dégradé personnalisé."
+        },
+        {
+            "type": "color_background",
+            "id": "bg_gradient_color",
+            "label": "Dégradé personnalisé",
+            "default": "linear-gradient(180deg, #6c757d 0%, #343a40 100%)",
+            "visible_if": "{{ section.settings.bg_type == 'custom' }}"
+        },
+        {
+            "type": "header",
+            "content": "Mise en page"
+        },
+        {
+            "type": "select",
+            "id": "container",
+            "label": "Conteneur",
+            "default": "container",
+            "options": [
+                { "value": "container", "label": "Page" },
+                { "value": "container-fluid", "label": "Personnalisé" }
+            ]
+        },
+        {
+            "type": "text",
+            "id": "max_width",
+            "label": "Largeur max. (px)",
+            "visible_if": "{{ section.settings.container == 'container-fluid' }}"
+        },
+        {
+            "type": "select",
+            "id": "text_align_mobile",
+            "label": "Alignement du texte - mobile",
+            "default": "text-center",
+            "options": [
+                { "value": "text-start", "label": "Gauche" },
+                { "value": "text-center", "label": "Centre" },
+                { "value": "text-end", "label": "Droite" }
+            ]
+        },
+        {
+            "type": "select",
+            "id": "text_align_desktop",
+            "label": "Alignement du texte - bureau",
+            "default": "text-lg-center",
+            "options": [
+                { "value": "text-lg-start", "label": "Gauche" },
+                { "value": "text-lg-center", "label": "Centre" },
+                { "value": "text-lg-end", "label": "Droite" }
+            ]
+        },
+        {
+            "type": "header",
+            "content": "En-tête de la section"
+        },
+        {
+            "type": "image_picker",
+            "id": "subtitle_img",
+            "label": "Légende Image"
+        },
+        {
+            "type": "text",
+            "id": "brand_image_size",
+            "label": "Image Largeur/Hauteur (px)",
+            "default": "60"
+        },
+        {
+            "type": "text",
+            "id": "subtitle",
+            "label": "Légende Texte"
+        },
+        {
+            "type": "select",
+            "id": "subtitle_size",
+            "label": "Taille de la légende",
+            "default": "fs-5",
+            "options": [
+                { "group": "Légende Standard", "value": "fs-1", "label": "Extra Grand" },
+                { "group": "Légende Standard", "value": "fs-2", "label": "Super Grand" },
+                { "group": "Légende Standard", "value": "fs-3", "label": "Très Grand" },
+                { "group": "Légende Standard", "value": "fs-4", "label": "Grand" },
+                { "group": "Légende Standard", "value": "fs-5", "label": "Moyen" },
+                { "group": "Légende Standard", "value": "fs-6", "label": "Petit" } 
+            ]
+        },
+        {
+            "type": "color",
+            "id": "color_caption",
+            "label": "Couleur de la légende",
+            "default": "#6c757d"
+        },
+        {
+            "type": "text",
+            "id": "title_overlay",
+            "label": "Titre overlay",
+            "info": "Laisser vide pour désactiver"
+        },
+        {
+            "type": "select",
+            "id": "title_overlay_position",
+            "label": "Position du titre overlay",
+            "default": "center",
+            "options": [
+                { "value": "top", "label": "Haut" },
+                { "value": "center", "label": "Centre" }
+            ]
+        },
+        {
+            "type": "select",
+            "id": "title_overlay_size",
+            "label": "Taille du titre overlay",
+            "default": "3",
+            "options": [
+                { "group": "Titre Overlay", "value": "4", "label": "Grand" },
+                { "group": "Titre Overlay", "value": "3", "label": "Moyen" },
+                { "group": "Titre Overlay", "value": "2", "label": "Petit" }
+            ]
+        },
+        {
+            "type": "color",
+            "id": "color_title_overlay",
+            "label": "Couleur du titre overlay",
+            "default": "#000000"
+        },
+        {
+            "type": "range",
+            "id": "title_overlay_opacity",
+            "label": "Opacité du titre overlay",
+            "default": 0.1,
+            "min": 0,
+            "max": 1,
+            "step": 0.1
+        },
+        {
+            "type": "checkbox",
+            "id": "apply_text_stroke",
+            "label": "Appliquer un effet contour de texte (stroke)",
+            "default": false
+        },
+        {
+            "type": "inline_richtext",
+            "id": "title",
+            "label": "Titre",
+            "default": "Galerie de Style"
+        },
+        {
+            "type": "paragraph",
+            "content": "Pour ajouter une surbrillance animée à un texte, mettez-le en italique en cliquant sur le bouton 'I' dans l'éditeur."
+        },
+        {
+            "type": "select",
+            "id": "italic_color_option",
+            "label": "Appliquer un style au texte en italique",
+            "options": [
+                { "value": "none", "label": "Aucun" },
+                { "value": "apply_color", "label": "Appliquer une couleur" },
+                { "value": "stencil", "label": "Appliquer le style pochoir" },
+                { "value": "background_cover", "label": "Appliquer le style surbrillance" },
+                { "value": "gradient_color", "label": "Appliquer une couleur dégradé" }
+            ],
+            "default": "none",
+            "info": "Choisissez comment styliser le texte en italique : sans style supplémentaire, avec une couleur, avec un effet de pochoir ou un style de surbrillance."
+        },
+        {
+            "type": "select",
+            "id": "highlighted_text_style",
+            "label": "Appliquer un style de soulignement au texte en italique",
+            "options": [
+                { "value": "none", "label": "Aucun" },
+                { "value": "basic_underline", "label": "Soulignement Basique" },
+                { "value": "squiggle_underline", "label": "Soulignement Ondulé" },
+                { "value": "squiggle_underline_2", "label": "Soulignement Signature" },
+                { "value": "circle_underline", "label": "Soulignement Cercle" },
+                { "value": "sketch_underline", "label": "Soulignement Esquisse" },
+                { "value": "heartbeat_underline", "label": "Soulignement Rythme" },
+                { "value": "zigzag_underline", "label": "Soulignement Zigzag" },
+                { "value": "wave_underline", "label": "Soulignement Vague" },
+                { "value": "double_zigzag_underline", "label": "Soulignement Double Zigzag" }
+            ],
+            "default": "none",
+            "info": "Choisissez un style de soulignement SVG pour le texte en surbrillance italique. Sélectionnez 'Aucun' pour ne pas appliquer de soulignement."
+        },
+        {
+            "type": "color",
+            "id": "highlight_color",
+            "label": "Couleur de surbrillance",
+            "default": "#25D366",
+            "info": "Couleur appliquée au texte en italique et au SVG de soulignement, si activés."
+        },
+        {
+            "type": "color_background",
+            "id": "title_gradient_color",
+            "label": "Dégradé de surbrillance",
+            "default": "linear-gradient(90deg, #c99700 0%, #1d1d1f 100%)",
+            "info": "Couleur dégradé appliquée au texte en italique, si activés et uniquement pour le style 'Appliquer une couleur dégradé'."
+        },
+        {
+            "type": "select",
+            "id": "heading_tag",
+            "label": "Balise titre (SEO)",
+            "default": "h2",
+            "options": [
+                { "value": "h1", "label": "h1" },
+                { "value": "h2", "label": "h2" },
+                { "value": "h3", "label": "h3" },
+                { "value": "h4", "label": "h4" },
+                { "value": "h5", "label": "h5" },
+                { "value": "h6", "label": "h6" },
+                { "value": "span", "label": "Aucune" }
+            ]
+        },
+        {
+            "type": "select",
+            "id": "title_size",
+            "label": "Taille du titre",
+            "default": "h2",
+            "options": [
+                { "group": "Titre Supérieur", "value": "display-1", "label": "Extra Extra Grand" },
+                { "group": "Titre Supérieur", "value": "display-2", "label": "Extra Grand" },
+                { "group": "Titre Supérieur", "value": "display-3", "label": "Ultra Grand" },
+                { "group": "Titre Supérieur", "value": "display-4", "label": "Super Grand" },
+                { "group": "Titre Standard", "value": "h1", "label": "Très Grand" },
+                { "group": "Titre Standard", "value": "h2", "label": "Grand" },
+                { "group": "Titre Standard", "value": "h3", "label": "Moyen" },
+                { "group": "Titre Standard", "value": "h4", "label": "Petit" },
+                { "group": "Titre Standard", "value": "h5", "label": "Très Petit" },
+                { "group": "Titre Standard", "value": "h6", "label": "Super Petit" }
+            ]
+        },
+        {
+            "type": "checkbox",
+            "id": "show_svg_h2",
+            "label": "Afficher le SVG sous-titre",
+            "default": true,
+            "info": "Activez cette option pour afficher le SVG sous le titre, tel que défini dans les paramètres du thème."
+        },
+        {
+            "type": "richtext",
+            "id": "description",
+            "label": "Description (facultatif)",
+            "default": "<p>Ajouter une description facultative à cette section</p>"
+        },
+        {
+            "type": "select",
+            "id": "description_size",
+            "label": "Taille de description",
+            "default": "fs-5",
+            "options": [
+                { "group": "Description Standard", "value": "fs-1", "label": "Extra Grand" },
+                { "group": "Description Standard", "value": "fs-2", "label": "Super Grand" },
+                { "group": "Description Standard", "value": "fs-3", "label": "Très Grand" },
+                { "group": "Description Standard", "value": "fs-4", "label": "Grand" },
+                { "group": "Description Standard", "value": "fs-5", "label": "Moyen" },
+                { "group": "Description Standard", "value": "fs-6", "label": "Petit" } 
+            ]
+        },
+        {
+            "type": "header",
+            "content": "Image"
+        },
+        {
+            "type": "image_picker",
+            "id": "mobile_image",
+            "label": "Image (mobile)"
+        },
+        {
+            "type": "image_picker",
+            "id": "desktop_image",
+            "label": "Image (bureau)"
+        },
+        {
+            "type": "select",
+            "id": "img_style",
+            "label": "Style d'angle",
+            "options": [
+              { "value": "rounded-0", "label": "Pas d'arrondi" },
+              { "value": "rounded", "label": "Image arrondi complet" },
+              { "value": "rounded-top", "label": "Image arrondi en haut" },
+              { "value": "rounded-bottom", "label": "Image arrondi en bas" },
+              { "value": "rounded-start", "label": "Image arrondi à gauche" },
+              { "value": "rounded-end", "label": "Image arrondi à droite" }
+            ],
+            "default": "rounded"
+        },
+        {
+            "type": "select",
+            "id": "border",
+            "label": "Bordure de l'image",
+            "default": "border",
+            "options": [
+                { "value": "", "label": "Aucune" },
+                { "value": "border", "label": "Bordure" }
+            ]
+        },
+        {
+            "type": "select",
+            "id": "border_color",
+            "label": "Couleur de la bordure",
+            "options": [
+                { "value": "", "label": "Default" },
+                { "value": "border-primary", "label": "Primaire" },
+                { "value": "border-secondary", "label": "Secondaire" },
+                { "value": "border-tertiary", "label": "Tertiaire" },
+                { "value": "border-dark", "label": "Sombre" },
+                { "value": "border-success", "label": "Succès" },
+                { "value": "border-warning", "label": "Avertissement" },
+                { "value": "border-danger", "label": "Danger" },
+                { "value": "border-info", "label": "Info" }
+            ],
+            "default": "",
+            "visible_if": "{{ section.settings.border == 'border' }}"
+        },
+        {
+            "type": "range",
+            "id": "border_width",
+            "label": "Largeur de la bordure",
+            "min": 1,
+            "max": 10,
+            "step": 1,
+            "default": 1,
+            "visible_if": "{{ section.settings.border == 'border' }}"
+        },
+        {
+            "type": "select",
+            "id": "shadow_sp",
+            "label": "Ombre",
+            "options": [
+                { "value": "shadow-none", "label": "Aucune" },
+                { "value": "shadow-1", "label": "Ombre légère" },
+                { "value": "shadow-2", "label": "Ombre partiel" },
+                { "value": "shadow-3", "label": "Ombre profonde" },
+                { "value": "shadow-4", "label": "Ombre totale" }
+            ],
+            "default": "shadow-1"
+        },
+        {
+            "type": "header",
+            "content": "Points"
+        },
+        {
+            "type": "select",
+            "id": "point_color",
+            "label": "Couleur des points",
+            "default": "--bs-primary",
+            "options": [
+                { "group": "Par défaut", "value": "--bs-body-bg", "label": "Corps (body)" },
+                { "group": "Principal", "value": "--bs-white", "label": "Blanc" },
+                { "group": "Principal", "value": "--bs-primary", "label": "Primaire" },
+                { "group": "Principal", "value": "--bs-secondary", "label": "Secondaire" },
+                { "group": "Principal", "value": "--bs-tertiary", "label": "Tertiaire" },
+                { "group": "Intermédiaire", "value": "--bs-light", "label": "Claire" },
+                { "group": "Intermédiaire", "value": "--bs-dark", "label": "Sombre" },
+                { "group": "Alerte", "value": "--bs-success", "label": "Succès" },
+                { "group": "Alerte", "value": "--bs-warning", "label": "Avertissement" },
+                { "group": "Alerte", "value": "--bs-danger", "label": "Danger" },
+                { "group": "Alerte", "value": "--bs-info", "label": "Info" }
+            ]
+        },
+        {
+            "type": "range",
+            "id": "point_diameter",
+            "label": "Diamètre des points",
+            "unit": "rem",
+            "min": 0.2,
+            "max": 2,
+            "step": 0.1,
+            "default": 1
+        },
+        {
+            "type": "header",
+            "content": "Espacement de la section"
+        },
+        {
+            "type": "range",
+            "id": "pt",
+            "label": "Haut interne",
+            "min": 0,
+            "max": 20,
+            "step": 1,
+            "default": 0
+        },
+        {
+            "type": "range",
+            "id": "pb",
+            "label": "Bas interne",
+            "min": 0,
+            "max": 20,
+            "step": 1,
+            "default": 0
+        },
+        {
+            "type": "range",
+            "id": "mt",
+            "label": "Haut externe",
+            "min": 0,
+            "max": 20,
+            "step": 1,
+            "default": 0
+        },
+        {
+            "type": "range",
+            "id": "mb",
+            "label": "Bas externe",
+            "min": 0,
+            "max": 20,
+            "step": 1,
+            "default": 0
+        },
+        {
+            "type": "header",
+            "content": "Visibilité",
+            "info": "Afficher/masquer cette section en fonction de la résolution de l'écran"
+        },
+        {
+            "type": "checkbox",
+            "id": "visibility_xs",
+            "label": "Afficher sur mobile",
+            "default": true
+        },
+        {
+            "type": "checkbox",
+            "id": "visibility_md",
+            "label": "Afficher sur tablette",
+            "default": true
+        },
+        {
+            "type": "checkbox",
+            "id": "visibility_lg",
+            "label": "Afficher sur bureau",
+            "default": true
+        }
+    ],
+    "blocks": [
+        {
+            "type": "point",
+            "name": "Point",
+            "settings": [
+                {
+                    "type": "text",
+                    "id": "title",
+                    "label": "Titre",
+                    "default": "Titre du point"
+                },
+                {
+                    "type": "richtext",
+                    "id": "description",
+                    "label": "Description",
+                    "default": "<p>Mettez un produit en avant avec un texte. Incluez des détails sur sa disponibilité ou son style.</p>",
+                    "info": "Laisser vide pour désactiver"
+                },
+                {
+                    "type": "header",
+                    "content": "Produit",
+                    "info": "En option"
+                },
+                {
+                    "type": "product",
+                    "id": "product",
+                    "label": "Produit"
+                },
+                {
+                    "type": "checkbox",
+                    "id": "show_image",
+                    "label": "Afficher l'image",
+                    "default": true
+                },
+                {
+                    "type": "checkbox",
+                    "id": "show_price",
+                    "label": "Afficher le prix",
+                    "default": true
+                },
+                {
+                    "type": "text",
+                    "id": "btn_text",
+                    "label": "Texte du bouton",
+                    "default": "Voir le produit",
+                    "info": "Laisser vide pour désactiver"
+                },
+                {
+                    "type": "select",
+                    "id": "btn_color",
+                    "label": "Couleur du bouton",
+                    "default": "btn-primary",
+                    "options": [
+                        { "group": "Normal", "value": "btn-link", "label": "Lien" },
+                        { "group": "Normal", "value": "btn-light", "label": "Claire" },
+                        { "group": "Normal", "value": "btn-dark", "label": "Sombre" },
+                        { "group": "Normal", "value": "btn-primary", "label": "Primaire" },
+                        { "group": "Normal", "value": "btn-secondary", "label": "Secondaire" },
+                        { "group": "Normal", "value": "btn-tertiary", "label": "Tertiaire" },
+                        { "group": "Normal", "value": "btn-success", "label": "Succès" },
+                        { "group": "Normal", "value": "btn-danger", "label": "Danger" },
+                        { "group": "Normal", "value": "btn-warning", "label": "Avertissement" },
+                        { "group": "Normal", "value": "btn-info", "label": "Info" },
+                        { "group": "Contour", "value": "btn-outline-light", "label": "Contour Claire" },
+                        { "group": "Contour", "value": "btn-outline-dark", "label": "Contour Sombre" },
+                        { "group": "Contour", "value": "btn-outline-primary", "label": "Contour Primaire" },
+                        { "group": "Contour", "value": "btn-outline-secondary", "label": "Contour Secondaire" },
+                        { "group": "Contour", "value": "btn-outline-tertiary", "label": "Contour Tertiaire" },
+                        { "group": "Contour", "value": "btn-outline-success", "label": "Contour Succès" },
+                        { "group": "Contour", "value": "btn-outline-danger", "label": "Contour Danger" },
+                        { "group": "Contour", "value": "btn-outline-warning", "label": "Contour Avertissement" },
+                        { "group": "Contour", "value": "btn-outline-info", "label": "Contour Info" }
+                    ]
+                },
+                {
+                    "type": "header",
+                    "content": "Positionnement mobile"
+                },
+                {
+                    "type": "range",
+                    "id": "mobile_pos_left",
+                    "label": "Gauche (%)",
+                    "min": 0,
+                    "max": 100,
+                    "step": 1,
+                    "default": 0
+                },
+                {
+                    "type": "range",
+                    "id": "mobile_pos_top",
+                    "label": "Haut (%)",
+                    "min": 0,
+                    "max": 100,
+                    "step": 1,
+                    "default": 0
+                },
+                {
+                    "type": "header",
+                    "content": "Positionnement bureau"
+                },
+                {
+                    "type": "range",
+                    "id": "desktop_pos_left",
+                    "label": "Gauche (%)",
+                    "min": 0,
+                    "max": 100,
+                    "step": 1,
+                    "default": 0
+                },
+                {
+                    "type": "range",
+                    "id": "desktop_pos_top",
+                    "label": "Haut (%)",
+                    "min": 0,
+                    "max": 100,
+                    "step": 1,
+                    "default": 0
+                }
+            ]
+        }
+    ],
+    "presets": [
+        {
+            "name": "Galerie de styles",
+            "category": "Inspiration"
+        }
+    ]
+}
+{% endschema %}

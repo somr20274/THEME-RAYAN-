@@ -1,0 +1,963 @@
+{% comment %}
+---------------------------------------------------------
+Copyright © 2019/2024 Theme Shopiweb Premium. Tous droits réservés.
+La copie, la modification, la distribution ou l'utilisation
+non autorisée de ce code ou de toute partie de celui-ci est formellement interdite.
+Les contrevenants seront poursuivis dans toute la mesure permise par la loi.
+---------------------------------------------------------
+{% endcomment %}
+
+{% liquid 
+    assign pt = section.settings.pt | prepend: 'pt-'
+    assign pb = section.settings.pb | prepend: 'pb-'
+    assign mt = section.settings.mt | prepend: 'mt-'
+    assign mb = section.settings.mb | prepend: 'mb-'
+
+    if section.settings.bg_type == 'custom'
+        assign text_color_class = section.settings.bg_color | split: " " | last
+        assign bg_class = 'content-bg-gradient ' | append: text_color_class
+    elsif section.settings.bg_type == 'image'
+        assign bg_class = section.settings.bg_color | split: " " | last
+    else
+        assign bg_class = section.settings.bg_color
+    endif
+
+    assign btn_shadow_sp = settings.btn_shadow_sp
+
+    assign visibility = ''
+
+    if section.settings.visibility_xs == false
+        assign visibility = 'd-none'
+    endif
+
+    if section.settings.visibility_md
+        assign visibility = ' d-md-block' | prepend: visibility
+    else 
+        assign visibility = ' d-md-none' | prepend: visibility
+    endif
+
+    if section.settings.visibility_lg
+        assign visibility = ' d-lg-block' | prepend: visibility
+    else 
+        assign visibility = ' d-lg-none' | prepend: visibility
+    endif
+%}
+
+{% style %}
+  {% for block in section.blocks %}
+      /* Readmore Shopiweb */
+      #holder-readmore-{{ block.id }} .limited-readmore .bottom-readmore {
+        background: linear-gradient(to bottom,rgb(255 255 255 / 0%),{{ block.settings.readmore_color }});
+      }
+      #holder-readmore-{{ block.id }} .read-more-checker ~ .read-more-button:before {
+        content: "{{ block.settings.text_voirplus }}";
+      }
+      #holder-readmore-{{ block.id }} .read-more-checker:checked ~ .read-more-button:before {
+        content: "{{ block.settings.text_voirmoins }}";
+      }
+  {% endfor %}
+{% endstyle %}
+
+<section 
+    id="image-text-image-{{ section.id }}" 
+    class="image-text-image enter-view overflow-hidden d-md-block d-lg-block {{ bg_class }} {{ pt }} {{ pb }} {{ mt }} {{ mb }} {{ visibility }}"
+    
+    {% if section.settings.bg_type == 'image' %}
+        style="background-image: url('{{ section.settings.background_img.src | image_url }}'); 
+               background-size: cover; 
+               background-repeat: no-repeat; 
+               background-position: center center;
+               position: relative;"
+    {% elsif section.settings.bg_type == 'custom' %}
+        style="background: {{ section.settings.bg_gradient_color }};"
+    {% endif %}>
+
+    {% if section.settings.bg_type == 'image' %}
+        <div class="background-overlay" 
+             style="background: rgba(0, 0, 0, {{ section.settings.background_img_opacity }});">
+        </div>
+        <div class="background-overlay-blur" 
+             style="backdrop-filter: blur({{ section.settings.background_img_blur }}px);
+                    -webkit-backdrop-filter: blur({{ section.settings.background_img_blur }}px);">
+        </div>
+    {% endif %}
+
+    <div class="{{ section.settings.container }} position-relative z-1"
+        {% if section.settings.container == 'container-fluid' %}
+           style="max-width: {{ section.settings.max_width }}px;"
+        {% endif %}>
+        <div class="row mx-n6 mx-lg-n8 align-items-lg-center row-cols-1 row-cols-sm-2 row-cols-lg-3">
+            {% for block in section.blocks %}
+                {% if block.type == 'image' %}
+                    <div class="col p-6 p-lg-8" 
+                         data-block-type="image"
+                         {{ block.shopify_attributes }}>
+                        <div 
+                            class="animate__animated animate__faster opacity-0"
+                            data-animate-class="animate__fadeIn"
+                            style="animation-delay: 0ms">
+                            {% if block.settings.image == blank %}
+                                {{ 'detailed-apparel-1' | placeholder_svg_tag: 'placeholder-svg rounded' }}
+                            {% else %}
+                                <div class="advanced-image-in position-relative">
+                                    <div class="svg-background">
+                                          {% if block.settings.show_background_img_advanced %}
+                                              {% render 'svg-image-advanced', 
+                                                  svg_image_name: block.settings.img_advanced_style, 
+                                                  svg_image_advanced_bg_color: block.settings.svg_image_advanced_bg_color, 
+                                                  svg_image_advanced_color1: block.settings.svg_image_advanced_color1, 
+                                                  svg_image_advanced_color2: block.settings.svg_image_advanced_color2,
+                                                  block_id: block.id
+                                              %}
+                                          {% endif %}
+                                    </div>
+                                    <div class="advanced-image-wrap">
+                                        {% liquid 
+                                            case block.settings.img_orientation
+                                                when 'adapt'
+                                                    assign img_width  = 900
+                                                    assign img_height = 900 | divided_by: block.settings.image.aspect_ratio | round
+                                                when 'square'
+                                                    assign img_width  = 900
+                                                    assign img_height = 900
+                                                when 'landscape'
+                                                    assign img_width  = 900
+                                                    assign img_height = 720
+                                                when 'landscape-x2'
+                                                    assign img_width  = 900
+                                                    assign img_height = 600
+                                                when 'portrait'
+                                                    assign img_width  = 720
+                                                    assign img_height = 900
+                                                when 'portrait-x2'
+                                                    assign img_width  = 600
+                                                    assign img_height = 900
+                                            endcase
+
+                                            assign classes = ''
+                                            assign classes = classes | append: block.settings.img_style | append: ' ' 
+                                            assign classes = classes | append: block.settings.border | append: ' '
+                                            assign classes = classes | append: block.settings.border_color | append: ' ' 
+                                            assign classes = classes | append: 'border-' | append: block.settings.border_width | append: ' ' 
+                                            assign classes = classes | append: block.settings.shadow_sp | append: ' ' 
+                                            assign classes = classes | strip
+                                        %}
+                                        {% if block.settings.show_background_img_advanced %}
+                                            {% assign img_width = 900 %}
+                                            {% assign img_height = 900 %}
+                                        {% endif %}
+                                        <img
+                                            class="img-fluid {% unless block.settings.show_background_img_advanced %}{{ classes }}{% endunless %}"
+                                            src="{{ block.settings.image.src | image_url: width: img_width, height: img_height, crop: block.settings.img_crop }}"
+                                            alt="{{ block.settings.image.alt | escape }}"
+                                            width="{{ img_width }}"
+                                            height="{{ img_height }}"
+                                            loading="lazy">
+                                    </div>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+        
+                {% elsif block.type == 'text' %}
+                    <div class="col p-6 p-lg-8 {{ block.settings.text_align_mobile }} {{ block.settings.text_align_desktop }}"
+                         data-block-type="text"
+                         {{ block.shopify_attributes }}>
+                        {% unless block.settings.subtitle_img == blank %}
+                            <div 
+                                class="animate__animated animate__faster opacity-0"
+                                {% if settings.effect_apply_caption_enable %}
+                                  data-animate-class="{{ settings.animation_caption_name }}"
+                                  style="animation-delay: 1200ms;"
+                                {% endif %}>
+                                    {% assign brand_img_width = block.settings.brand_image_size %}
+                                    <img
+                                        class="img-fluid mb-5"
+                                        src="{{ block.settings.subtitle_img.src | image_url: width: brand_img_width }}"
+                                        alt="{{ block.settings.subtitle_img.alt | escape }}"
+                                        width="{{ brand_img_width }}"
+                                        height="auto"
+                                        loading="lazy">
+                                </div>
+                        {% endunless %}
+        
+                      
+                        {% unless block.settings.subtitle == blank %}
+                            <div 
+                                class="animate__animated animate__faster opacity-0"
+                                {% if settings.effect_apply_caption_enable %}
+                                  data-animate-class="{{ settings.animation_caption_name }}"
+                                  style="animation-delay: 1000ms;"
+                                {% endif %}>
+                                <p class="subtitle text-uppercase fw-500 mb-3 {{ block.settings.subtitle_size }}"
+                                    style="color:{{ block.settings.color_caption }};">
+                                    {{ block.settings.subtitle }}
+                                </p>
+                            </div>
+                        {% endunless %} 
+                      
+                        {% unless block.settings.title == blank %}
+                            <div class="overlay-text-container my-4" style="position: relative;">
+                                <{{ block.settings.heading_tag }} class="title enter-view {{ block.settings.title_size }} animate__animated animate__faster opacity-0
+                                    {% if block.settings.highlighted_text_style != 'none' %}
+                                        mb-7
+                                    {% else %}
+                                        mb-5
+                                    {% endif %}"
+                                    {% if settings.effect_apply_title_enable %}
+                                      data-animate-class="{{ settings.animation_title_name }}"
+                                      style="animation-delay: 200ms;"
+                                    {% endif %}>
+                        
+                                    {% assign highlighted_title = block.settings.title %}
+                                    {% assign svg_parts = highlighted_title | split: '<em>' %}
+                                    {% for part in svg_parts %}
+                                        {% if forloop.index == 1 %}
+                                            {{ part }}
+                                        {% elsif forloop.index == 2 %}
+                                            {% assign end_svg = part | split: '</em>' %}
+                                            {% if block.settings.italic_color_option == 'none' and block.settings.highlighted_text_style == 'none' %}
+                                                <em>{{ end_svg[0] }}</em>
+                                            {% else %}
+                                                &nbsp;<span class="background-animate" style="position: relative; display: inline-block;
+                                                    {% if block.settings.italic_color_option == 'apply_color' and block.settings.highlight_color != blank %}
+                                                        color: {{ block.settings.highlight_color }};
+                                                    {% elsif block.settings.italic_color_option == 'stencil' %}
+                                                        -webkit-text-stroke: .02em currentColor;
+                                                        -webkit-text-fill-color: transparent;
+                                                    {% elsif block.settings.italic_color_option == 'background_cover' %}
+                                                        background-repeat: no-repeat;
+                                                        background-image: linear-gradient(to right, {{ block.settings.highlight_color }} 0%, transparent 100%), 
+                                                                          linear-gradient(to right, {{ block.settings.highlight_color }} 0%, transparent 100%);
+                                                        background-position: left 70%;
+                                                    {% elsif block.settings.italic_color_option == 'gradient_color' %}
+                                                        -webkit-background-clip: text;
+                                                        -webkit-text-fill-color: transparent;
+                                                        background-repeat: no-repeat;
+                                                        background-image: {{ block.settings.title_gradient_color }};
+                                                        background-position: left 85%;
+                                                    {% endif %}">
+                                                    {{ end_svg[0] }}
+                                                    {% if block.settings.highlighted_text_style != 'none' and block.settings.highlight_color != blank %}
+                                                        {% render 'svg-title', svg_name: block.settings.highlighted_text_style, stroke_color: block.settings.highlight_color %}
+                                                    {% endif %}
+                                                </span>&nbsp;
+                                            {% endif %}
+                                            {{ end_svg[1] }}
+                                        {% else %}
+                                            {{ part }}
+                                        {% endif %}
+                                    {% endfor %}
+                                
+                                    {% if block.settings.show_svg_h2 %}
+                                        {% if settings.custom_svg_h2 != blank %}
+                                            <div class="h2_svg animate__animated animate__faster opacity-0"
+                                                {% if settings.effect_apply_svg_enable %} 
+                                                  data-animate-class="{{ settings.animation_svg_name }}"
+                                                  style="animation-delay: 400ms;"
+                                                {% endif %}
+                                            >
+                                                <span style="fill:{{ settings.color_svg_h2 }}; width:{{ settings.width_svg_h2 }}rem;"> {{ settings.custom_svg_h2 }}</span>
+                                            </div>
+                                        {% else %}
+                                            {% if settings.svg_h2 != 'none' %}
+                                                <div class="h2_svg mb-4 animate__animated animate__faster opacity-0"
+                                                    {% if settings.effect_apply_svg_enable %} 
+                                                      data-animate-class="{{ settings.animation_svg_name }}"
+                                                      style="animation-delay: 400ms;"
+                                                    {% endif %}
+                                                >
+                                                    <span style="fill:{{ settings.color_svg_h2 }}; width:{{ settings.width_svg_h2 }}rem;"> {% render 'svg-subtitle', svg_h2: settings.svg_h2 %}</span>
+                                                </div>
+                                            {% endif %}
+                                        {% endif %}
+                                    {% endif %}
+                                </{{ block.settings.heading_tag }}>
+                            </div>
+                        {% endunless %}
+        
+                        {% if block.settings.readmore %}
+                            <div id="holder-readmore-{{ block.id }}" class="holder-readmore">
+                                <input type="checkbox" class="read-more-checker" id="read-more-checker--{{ block.id }}" />
+                                <div class="limited-readmore l-{{ block.settings.formread }} mb-4">
+                                    {% unless block.settings.description == blank %}
+                                        <div 
+                                            class="animate__animated animate__faster opacity-0"
+                                            {% if settings.effect_apply_description_enable %} 
+                                              data-animate-class="{{ settings.animation_description_name }}"
+                                              style="animation-delay: 600ms;"
+                                            {% endif %}>
+                                            <div class="description rte mb-7 {{ block.settings.description_size }}">
+                                                {{ block.settings.description }}
+                                            </div>
+                                        </div>
+                                    {% endunless %}
+                                <div class="bottom-readmore">&nbsp</div>
+                                </div>
+                                <label for="read-more-checker--{{ block.id }}" class="read-more-button mb-6 animate__animated animate__faster opacity-0"
+                                        {% if settings.effect_apply_description_enable %} 
+                                          data-animate-class="{{ settings.animation_description_name }}"
+                                          style="animation-delay: 600ms;"
+                                        {% endif %}></label>
+                            </div>
+                        {% else %}
+                            {% unless block.settings.description == blank %}
+                                <div 
+                                    class="animate__animated animate__faster opacity-0"
+                                    {% if settings.effect_apply_description_enable %} 
+                                      data-animate-class="{{ settings.animation_description_name }}"
+                                      style="animation-delay: 600ms;"
+                                    {% endif %}>
+                                    <div class="description rte mb-7 {{ block.settings.description_size }}">
+                                        {{ block.settings.description }}
+                                    </div>
+                                </div>
+                            {% endunless %}
+                        {% endif %}
+                              
+                        {% unless block.settings.btn_text == blank %}
+                            <div 
+                                class="d-inline-flex animate__animated animate__faster opacity-0"
+                                {% if settings.effect_apply_btn_enable %} 
+                                  data-animate-class="{{ settings.animation_btn_name }}"
+                                  style="animation-delay: 800ms;"
+                                {% endif %}>
+                                <a 
+                                    class="btn {{ block.settings.btn_color }} {{ btn_shadow_sp }} {{ block.settings.btn_size }}"
+                                    href="{{ block.settings.btn_url }}">
+                                    {{ block.settings.btn_text }}
+                                </a>
+                            </div>
+                        {% endunless %}
+                    </div>
+        
+                    
+                {% endif %}
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+{% schema %}
+{
+    "name": "Image Texte Image",
+    "disabled_on": {
+      "groups": ["header", "footer"]
+    },
+    "settings": [
+        {
+            "type": "paragraph", 
+            "content": "Documentation FR : [Image avec texte by Shopiweb](https:\/\/www.docs.shopiweb.fr\/theme-premium\/documentation\/sections\/image-texte-image)"
+        },
+        {
+            "type": "header",
+            "content": "Général"
+        },
+        {
+            "type": "select",
+            "id": "bg_type",
+            "label": "Type d'arrière-plan",
+            "default": "predefined",
+            "options": [
+                { "value": "predefined", "label": "Couleur" },
+                { "value": "custom", "label": "Fondu" },
+                { "value": "image", "label": "Image" }
+            ]
+        },
+        {
+            "type": "select",
+            "id": "bg_color",
+            "label": "Couleur d'arrière plan",
+            "default": "bg-body text-body",
+            "options": [
+                { "group": "Principal", "value": "bg-primary text-white", "label": "Primaire (Texte blanc)" },
+                { "group": "Principal", "value": "bg-secondary text-white", "label": "Secondaire (Texte blanc)" },
+                { "group": "Principal", "value": "bg-tertiary text-white", "label": "Tertiaire (Texte blanc)" },
+                { "group": "Intermédiaire", "value": "bg-white text-dark", "label": "Blanc (Texte noir)" },
+                { "group": "Intermédiaire", "value": "bg-light text-body", "label": "Claire (Texte noir)" },
+                { "group": "Intermédiaire", "value": "bg-dark text-white", "label": "Sombre (Texte blanc)" },
+                { "group": "Par défaut", "value": "bg-body text-body", "label": "Corps (body) (Texte noir)" }
+            ],
+            "info": "S'applique également au texte si vous sélectionnez un dégradé personnalisé ou une image d'arrière-plan."
+        },
+        {
+            "type": "color_background",
+            "id": "bg_gradient_color",
+            "label": "Dégradé personnalisé",
+            "default": "linear-gradient(180deg, #6c757d 0%, #343a40 100%)",
+            "visible_if": "{{ section.settings.bg_type == 'custom' }}"
+        },
+        {
+            "type": "image_picker",
+            "id": "background_img",
+            "label": "Image d'arrière-plan",
+            "visible_if": "{{ section.settings.bg_type == 'image' }}"
+        },
+        {
+            "type": "range",
+            "id": "background_img_opacity",
+            "label": "Opacité",
+            "min": 0,
+            "max": 1,
+            "step": 0.1,
+            "default": 0.3,
+            "visible_if": "{{ section.settings.bg_type == 'image' }}"
+        },
+        {
+            "type": "range",
+            "id": "background_img_blur",
+            "label": "Flou",
+            "min": 0,
+            "max": 10,
+            "step": 1,
+            "default": 0,
+            "visible_if": "{{ section.settings.bg_type == 'image' }}"
+        },
+        {
+            "type": "header",
+            "content": "Mise en page"
+        },
+        {
+            "type": "select",
+            "id": "container",
+            "label": "Conteneur",
+            "default": "container",
+            "options": [
+                { "value": "container", "label": "Page" },
+                { "value": "container-fluid", "label": "Personnalisé" }
+            ]
+        },
+        {
+            "type": "text",
+            "id": "max_width",
+            "label": "Largeur max. (px)",
+            "default": "991",
+            "visible_if": "{{ section.settings.container == 'container-fluid' }}"
+        },
+        {
+            "type": "header",
+            "content": "Espacement de la section"
+        },
+        {
+            "type": "range",
+            "id": "pt",
+            "label": "Haut interne",
+            "min": 0,
+            "max": 20,
+            "step": 1,
+            "default": 0
+        },
+        {
+            "type": "range",
+            "id": "pb",
+            "label": "Bas interne",
+            "min": 0,
+            "max": 20,
+            "step": 1,
+            "default": 0
+        },
+        {
+            "type": "range",
+            "id": "mt",
+            "label": "Haut externe",
+            "min": 0,
+            "max": 20,
+            "step": 1,
+            "default": 0
+        },
+        {
+            "type": "range",
+            "id": "mb",
+            "label": "Bas externe",
+            "min": 0,
+            "max": 20,
+            "step": 1,
+            "default": 0
+        },
+        {
+            "type": "header",
+            "content": "Visibilité",
+            "info": "Afficher/masquer cette section en fonction de la résolution de l'écran"
+        },
+        {
+            "type": "checkbox",
+            "id": "visibility_xs",
+            "label": "Afficher sur mobile",
+            "default": true
+        },
+        {
+            "type": "checkbox",
+            "id": "visibility_md",
+            "label": "Afficher sur tablette",
+            "default": true
+        },
+        {
+            "type": "checkbox",
+            "id": "visibility_lg",
+            "label": "Afficher sur bureau",
+            "default": true
+        }
+    ],
+    "blocks": [
+        {
+            "type": "image",
+            "name": "Image",
+            "limit": 3,
+            "settings": [
+                {
+                    "type": "image_picker",
+                    "id": "image",
+                    "label": "Image"
+                },
+                {
+                    "type": "select",
+                    "id": "img_orientation",
+                    "label": "Image orientation",
+                    "default": "landscape",
+                    "options": [
+                        { "value": "adapt", "label": "Adapté" },
+                        { "value": "square", "label": "Carré" },
+                        { "value": "landscape", "label": "Paysage" },
+                        { "value": "landscape-x2", "label": "Paysage 2x" },
+                        { "value": "portrait", "label": "Portrait" },
+                        { "value": "portrait-x2", "label": "Portrait 2x" }
+                    ]
+                },
+                {
+                    "type": "select",
+                    "id": "img_crop",
+                    "label": "Recadrage de l'image",
+                    "default": "center",
+                    "options": [
+                        { "value": "top", "label": "Haut" },
+                        { "value": "center", "label": "Centre" },
+                        { "value": "bottom", "label": "Bas" },
+                        { "value": "left", "label": "Gauche" },
+                        { "value": "right", "label": "Droite" }
+                    ]
+                },
+                {
+                    "type": "select",
+                    "id": "img_style",
+                    "label": "Style d'angle",
+                    "options": [
+                      { "value": "rounded-0", "label": "Pas d'arrondi" },
+                      { "value": "rounded", "label": "Image arrondi complet" },
+                      { "value": "rounded-top", "label": "Image arrondi en haut" },
+                      { "value": "rounded-bottom", "label": "Image arrondi en bas" },
+                      { "value": "rounded-start", "label": "Image arrondi à gauche" },
+                      { "value": "rounded-end", "label": "Image arrondi à droite" }
+                    ],
+                    "default": "rounded"
+                },
+                {
+                    "type": "select",
+                    "id": "border",
+                    "label": "Bordure de l'image",
+                    "default": "border",
+                    "options": [
+                        { "value": "", "label": "Aucune" },
+                        { "value": "border", "label": "Bordure" }
+                    ]
+                },
+                {
+                    "type": "select",
+                    "id": "border_color",
+                    "label": "Couleur de la bordure",
+                    "options": [
+                        { "value": "", "label": "Default" },
+                        { "value": "border-primary", "label": "Primaire" },
+                        { "value": "border-secondary", "label": "Secondaire" },
+                        { "value": "border-tertiary", "label": "Tertiaire" },
+                        { "value": "border-dark", "label": "Sombre" },
+                        { "value": "border-success", "label": "Succès" },
+                        { "value": "border-warning", "label": "Avertissement" },
+                        { "value": "border-danger", "label": "Danger" },
+                        { "value": "border-info", "label": "Info" }
+                    ],
+                    "default": "",
+                    "visible_if": "{{ block.settings.border == 'border' }}"
+                },
+                {
+                    "type": "range",
+                    "id": "border_width",
+                    "label": "Largeur de la bordure",
+                    "min": 1,
+                    "max": 10,
+                    "step": 1,
+                    "default": 1,
+                    "visible_if": "{{ block.settings.border == 'border' }}"
+                },
+                {
+                    "type": "select",
+                    "id": "shadow_sp",
+                    "label": "Ombre",
+                    "options": [
+                        { "value": "shadow-none", "label": "Aucune" },
+                        { "value": "shadow-1", "label": "Ombre légère" },
+                        { "value": "shadow-2", "label": "Ombre partiel" },
+                        { "value": "shadow-3", "label": "Ombre profonde" },
+                        { "value": "shadow-4", "label": "Ombre totale" }
+                    ],
+                    "default": "shadow-1"
+                },
+                {
+                    "type": "header",
+                    "content": "Options d'image avancées"
+                },
+                {
+                    "type": "checkbox",
+                    "id": "show_background_img_advanced",
+                    "label": "Afficher le cadre SVG",
+                    "default": false,
+                    "info": "Cochez cette option pour afficher un cadre SVG autour de l'image."
+                },
+                {
+                    "type": "select",
+                    "id": "img_advanced_style",
+                    "label": "Sélectionner un style de cadre SVG",
+                    "options": [
+                        { "group": "Image Gauche", "value": "pinceau_abstrait_left", "label": "Pinceau Abstrait (Gauche)" },
+                        { "group": "Image Droite", "value": "pinceau_abstrait_right", "label": "Pinceau Abstrait (Droite)" },
+                        { "group": "Image Gauche", "value": "archee_left", "label": "Archée (Gauche)" },
+                        { "group": "Image Droite", "value": "archee_right", "label": "Archée (Droite)" },
+                        { "group": "Image Gauche", "value": "arche_details_left", "label": "Archée Détails (Gauche)" },
+                        { "group": "Image Droite", "value": "arche_details_right", "label": "Archée Détails (Droite)" },
+                        { "group": "Image Gauche", "value": "carre_left", "label": "Carré Ombre (Gauche)" },
+                        { "group": "Image Droite", "value": "carre_right", "label": "Carré Ombre (Droite)" },
+                        { "group": "Image Gauche", "value": "carre_bloc_left", "label": "Carré Bloc (Gauche)" },
+                        { "group": "Image Droite", "value": "carre_bloc_right", "label": "Carré Bloc (Droite)" },
+                        { "group": "Image Gauche", "value": "carre_focus_left", "label": "Carré Focus (Gauche)" },
+                        { "group": "Image Droite", "value": "carre_focus_right", "label": "Carré Focus (Droite)" },
+                        { "group": "Image Gauche", "value": "carre_dynamique_left", "label": "Carré Dynamique (Gauche)" },
+                        { "group": "Image Droite", "value": "carre_dynamique_right", "label": "Carré Dynamique (Droite)" },
+                        { "group": "Image Gauche", "value": "nature_abstraite_left", "label": "Nature Abstraite (Gauche)" },
+                        { "group": "Image Droite", "value": "nature_abstraite_right", "label": "Nature Abstraite (Droite)" },
+                        { "group": "Image Gauche", "value": "technologie_left", "label": "Technologie (Gauche)" },
+                        { "group": "Image Droite", "value": "technologie_right", "label": "Technologie (Droite)" },
+                        { "group": "Image Gauche", "value": "technologie_3_left", "label": "Technologie Cercle (Gauche)" },
+                        { "group": "Image Droite", "value": "technologie_3_right", "label": "Technologie Cercle (Droite)" },
+                        { "group": "Image Gauche", "value": "ellipse_organique_left", "label": "Ellipse Organique (Gauche)" },
+                        { "group": "Image Droite", "value": "ellipse_organique_right", "label": "Ellipse Organique (Droite)" },
+                        { "group": "Image Gauche", "value": "cercle_ombre_left", "label": "Cercle Ombre (Gauche)" },
+                        { "group": "Image Droite", "value": "cercle_ombre_right", "label": "Cercle Ombre (Droite)" },
+                        { "group": "Image Gauche", "value": "odyssee_left", "label": "Odyssée Florale (Gauche)" },
+                        { "group": "Image Droite", "value": "odyssee_right", "label": "Odyssée Florale (Droite)" },
+                        { "group": "Image Gauche", "value": "harmonie_left", "label": "Harmonie Feuille (Gauche)" },
+                        { "group": "Image Droite", "value": "harmonie_right", "label": "Harmonie Feuille (Droite)" }
+                    ],
+                    "default": "pinceau_abstrait_left",
+                    "info": "Choisissez un style de cadre SVG à appliquer autour de l'image.",
+                    "visible_if": "{{ block.settings.show_background_img_advanced == true }}"
+                },
+                {
+                    "type": "color",
+                    "id": "svg_image_advanced_bg_color",
+                    "label": "Couleur d'arrière-plan du cadre SVG",
+                    "default": "#efefef",
+                    "visible_if": "{{ block.settings.show_background_img_advanced == true }}"
+                },
+                {
+                    "type": "color",
+                    "id": "svg_image_advanced_color1",
+                    "label": "Couleur principale du cadre",
+                    "default": "#000000",
+                    "visible_if": "{{ block.settings.show_background_img_advanced == true }}"
+                },
+                {
+                    "type": "color",
+                    "id": "svg_image_advanced_color2",
+                    "label": "Couleur secondaire du cadre",
+                    "default": "#000000",
+                    "visible_if": "{{ block.settings.show_background_img_advanced == true }}"
+                }
+            ]
+        },
+        {
+            "type": "text",
+            "name": "Texte",
+            "limit": 3,
+            "settings": [
+                {
+                    "type": "select",
+                    "id": "text_align_mobile",
+                    "label": "Alignement du texte - mobile",
+                    "default": "text-center",
+                    "options": [
+                        { "value": "text-start", "label": "Gauche" },
+                        { "value": "text-center", "label": "Centre" },
+                        { "value": "text-end", "label": "Droite" }
+                    ]
+                },
+                {
+                    "type": "select",
+                    "id": "text_align_desktop",
+                    "label": "Alignement du texte - bureau",
+                    "default": "text-lg-center",
+                    "options": [
+                        { "value": "text-lg-start", "label": "Gauche" },
+                        { "value": "text-lg-center", "label": "Centre" },
+                        { "value": "text-lg-end", "label": "Droite" }
+                    ]
+                },
+                {
+                    "type": "image_picker",
+                    "id": "subtitle_img",
+                    "label": "Légende Image"
+                },
+                {
+                    "type": "text",
+                    "id": "brand_image_size",
+                    "label": "Image Largeur/Hauteur (px)",
+                    "default": "60"
+                },
+                {
+                    "type": "text",
+                    "id": "subtitle",
+                    "label": "Légende Texte",
+                    "default": "Proposition de valeur unique"
+                },
+                {
+                    "type": "select",
+                    "id": "subtitle_size",
+                    "label": "Taille de la légende",
+                    "default": "fs-5",
+                    "options": [
+                        { "group": "Légende Standard", "value": "fs-1", "label": "Extra Grand" },
+                        { "group": "Légende Standard", "value": "fs-2", "label": "Super Grand" },
+                        { "group": "Légende Standard", "value": "fs-3", "label": "Très Grand" },
+                        { "group": "Légende Standard", "value": "fs-4", "label": "Grand" },
+                        { "group": "Légende Standard", "value": "fs-5", "label": "Moyen" },
+                        { "group": "Légende Standard", "value": "fs-6", "label": "Petit" } 
+                    ]
+                },
+                {
+                  "type": "color",
+                  "id": "color_caption",
+                  "label": "Couleur de la légende",
+                  "default": "#6c757d"
+                },
+                {
+                    "type": "inline_richtext",
+                    "id": "title",
+                    "label": "Titre",
+                    "default": "Image Texte Image"
+                },
+                {
+                    "type": "paragraph",
+                    "content": "Pour ajouter une surbrillance animée à un texte, mettez-le en italique en cliquant sur le bouton 'I' dans l'éditeur."
+                },
+                {
+                    "type": "select",
+                    "id": "italic_color_option",
+                    "label": "Appliquer un style au texte en italique",
+                    "options": [
+                        { "value": "none", "label": "Aucun" },
+                        { "value": "apply_color", "label": "Appliquer une couleur" },
+                        { "value": "stencil", "label": "Appliquer le style pochoir" },
+                        { "value": "background_cover", "label": "Appliquer le style surbrillance" },
+                        { "value": "gradient_color", "label": "Appliquer une couleur dégradé" }
+                    ],
+                    "default": "none",
+                    "info": "Choisissez comment styliser le texte en italique : sans style supplémentaire, avec une couleur, avec un effet de pochoir ou un style de surbrillance."
+                },
+                {
+                    "type": "select",
+                    "id": "highlighted_text_style",
+                    "label": "Appliquer un style de soulignement au texte en italique",
+                    "options": [
+                        { "value": "none", "label": "Aucun" },
+                        { "value": "basic_underline", "label": "Soulignement Basique" },
+                        { "value": "squiggle_underline", "label": "Soulignement Ondulé" },
+                        { "value": "squiggle_underline_2", "label": "Soulignement Signature" },
+                        { "value": "circle_underline", "label": "Soulignement Cercle" },
+                        { "value": "sketch_underline", "label": "Soulignement Esquisse" },
+                        { "value": "heartbeat_underline", "label": "Soulignement Rythme" },
+                        { "value": "zigzag_underline", "label": "Soulignement Zigzag" },
+                        { "value": "wave_underline", "label": "Soulignement Vague" },
+                        { "value": "double_zigzag_underline", "label": "Soulignement Double Zigzag" }
+                    ],
+                    "default": "none",
+                    "info": "Choisissez un style de soulignement SVG pour le texte en surbrillance italique. Sélectionnez 'Aucun' pour ne pas appliquer de soulignement."
+                },
+                {
+                    "type": "color",
+                    "id": "highlight_color",
+                    "label": "Couleur de surbrillance",
+                    "default": "#25D366",
+                    "info": "Couleur appliquée au texte en italique et au SVG de soulignement, si activés."
+                },
+                {
+                    "type": "color_background",
+                    "id": "title_gradient_color",
+                    "label": "Dégradé de surbrillance",
+                    "default": "linear-gradient(90deg, #c99700 0%, #1d1d1f 100%)",
+                    "info": "Couleur dégradé appliquée au texte en italique, si activés et uniquement pour le style 'Appliquer une couleur dégradé'."
+                },
+                {
+                    "type": "select",
+                    "id": "heading_tag",
+                    "label": "Balise titre (SEO)",
+                    "default": "h2",
+                    "options": [
+                        { "value": "h1", "label": "h1" },
+                        { "value": "h2", "label": "h2" },
+                        { "value": "h3", "label": "h3" },
+                        { "value": "h4", "label": "h4" },
+                        { "value": "h5", "label": "h5" },
+                        { "value": "h6", "label": "h6" },
+                        { "value": "span", "label": "Aucune" }
+                    ]
+                },
+                {
+                    "type": "select",
+                    "id": "title_size",
+                    "label": "Taille du titre",
+                    "default": "h2",
+                    "options": [
+                        { "group": "Titre Supérieur", "value": "display-1", "label": "Extra Extra Grand" },
+                        { "group": "Titre Supérieur", "value": "display-2", "label": "Extra Grand" },
+                        { "group": "Titre Supérieur", "value": "display-3", "label": "Ultra Grand" },
+                        { "group": "Titre Supérieur", "value": "display-4", "label": "Super Grand" },
+                        { "group": "Titre Standard", "value": "h1", "label": "Très Grand" },
+                        { "group": "Titre Standard", "value": "h2", "label": "Grand" },
+                        { "group": "Titre Standard", "value": "h3", "label": "Moyen" },
+                        { "group": "Titre Standard", "value": "h4", "label": "Petit" },
+                        { "group": "Titre Standard", "value": "h5", "label": "Très Petit" },
+                        { "group": "Titre Standard", "value": "h6", "label": "Super Petit" }
+                    ]
+                },
+                {
+                    "type": "checkbox",
+                    "id": "show_svg_h2",
+                    "label": "Afficher le SVG sous-titre",
+                    "default": true,
+                    "info": "Activez cette option pour afficher le SVG sous le titre, tel que défini dans les paramètres du thème."
+                },
+                {
+                    "type": "richtext",
+                    "id": "description",
+                    "label": "Description",
+                    "default": "<p>Associez du texte à une image pour mettre l'accent sur le produit, la collection ou l'article de blog de votre choix. Ajoutez des détails sur la disponibilité, le style, ou donnez même un avis.</p>"
+                },
+                {
+                    "type": "select",
+                    "id": "description_size",
+                    "label": "Taille de description",
+                    "default": "fs-5",
+                    "options": [
+                        { "group": "Description Standard", "value": "fs-1", "label": "Extra Grand" },
+                        { "group": "Description Standard", "value": "fs-2", "label": "Super Grand" },
+                        { "group": "Description Standard", "value": "fs-3", "label": "Très Grand" },
+                        { "group": "Description Standard", "value": "fs-4", "label": "Grand" },
+                        { "group": "Description Standard", "value": "fs-5", "label": "Moyen" },
+                        { "group": "Description Standard", "value": "fs-6", "label": "Petit" } 
+                    ]
+                },
+                {
+                    "type": "header",
+                    "content": "Contenu caché"
+                },
+                {
+                    "type": "checkbox",
+                    "id": "readmore",
+                    "default": false,
+                    "label": "Activer le contenu caché (Voir plus)"
+                },
+                {
+                    "type": "range",
+                    "id": "formread",
+                    "min": 100,
+                    "max": 400,
+                    "step": 100,
+                    "unit": "px",
+                    "label": "À partir de...",
+                    "default": 200,
+                    "visible_if": "{{ block.settings.readmore == true }}"
+                },
+                {
+                    "type": "color",
+                    "id": "readmore_color",
+                    "label": "Couleur du fondu",
+                    "default": "#fff",
+                    "visible_if": "{{ block.settings.readmore == true }}"
+                },
+                {
+                    "type": "text",
+                    "id": "text_voirplus",
+                    "label": "Texte (Voir plus)",
+                    "default": "Voir plus",
+                    "visible_if": "{{ block.settings.readmore == true }}"
+                },
+                {
+                    "type": "text",
+                    "id": "text_voirmoins",
+                    "label": "Texte (Voir moins)",
+                    "default": "Voir moins",
+                    "visible_if": "{{ block.settings.readmore == true }}"
+                },
+                {
+                    "type": "header",
+                    "content": "Bouton"
+                },
+                {
+                    "type": "text",
+                    "id": "btn_text",
+                    "label": "Texte du bouton",
+                    "info": "Laisser vide pour désactiver"
+                },
+                {
+                    "type": "url",
+                    "id": "btn_url",
+                    "label": "URL du bouton"
+                },
+                {
+                    "type": "select",
+                    "id": "btn_color",
+                    "label": "Couleur du bouton",
+                    "default": "btn-primary",
+                    "options": [
+                        { "group": "Normal", "value": "btn-link", "label": "Lien" },
+                        { "group": "Normal", "value": "btn-light", "label": "Claire" },
+                        { "group": "Normal", "value": "btn-dark", "label": "Sombre" },
+                        { "group": "Normal", "value": "btn-primary", "label": "Primaire" },
+                        { "group": "Normal", "value": "btn-secondary", "label": "Secondaire" },
+                        { "group": "Normal", "value": "btn-tertiary", "label": "Tertiaire" },
+                        { "group": "Normal", "value": "btn-success", "label": "Succès" },
+                        { "group": "Normal", "value": "btn-danger", "label": "Danger" },
+                        { "group": "Normal", "value": "btn-warning", "label": "Avertissement" },
+                        { "group": "Normal", "value": "btn-info", "label": "Info" },
+                        { "group": "Contour", "value": "btn-outline-light", "label": "Contour Claire" },
+                        { "group": "Contour", "value": "btn-outline-dark", "label": "Contour Sombre" },
+                        { "group": "Contour", "value": "btn-outline-primary", "label": "Contour Primaire" },
+                        { "group": "Contour", "value": "btn-outline-secondary", "label": "Contour Secondaire" },
+                        { "group": "Contour", "value": "btn-outline-tertiary", "label": "Contour Tertiaire" },
+                        { "group": "Contour", "value": "btn-outline-success", "label": "Contour Succès" },
+                        { "group": "Contour", "value": "btn-outline-danger", "label": "Contour Danger" },
+                        { "group": "Contour", "value": "btn-outline-warning", "label": "Contour Avertissement" },
+                        { "group": "Contour", "value": "btn-outline-info", "label": "Contour Info" }
+                    ]
+                },
+                {
+                    "type": "select",
+                    "id": "btn_size",
+                    "label": "Taille du bouton",
+                    "default": "btn-md",
+                    "options": [
+                        { "value": "btn-sm", "label": "Petit" },
+                        { "value": "btn-md", "label": "Normal" },
+                        { "value": "btn-lg", "label": "Large" }
+                    ]
+                }
+            ]
+        }
+    ],
+    "max_blocks": 3,
+    "presets": [
+        {
+            "name": "Image Texte Image",
+            "category": "Inspiration"
+        }
+    ]
+}
+{% endschema %}
